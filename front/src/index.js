@@ -5,14 +5,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import KaKaoMap from "./KaKaoMap";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import Owner from "./pages/Owner";
+import Main from "./components/Main";
 
 // 라우팅 컴포넌트
 const App = () => (
     <BrowserRouter>
         <Routes>
-            <Route path="/" element={<KaKaoMap />} />
+            <Route path="/" element={<Main />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/owner" element={<Owner />} />
         </Routes>
     </BrowserRouter>
 );
