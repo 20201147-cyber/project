@@ -77,83 +77,78 @@ const Admin = () => {
 
     // 실시간 DB 저장 버튼 클릭
 
-    const saveLiveToDB2 = async () => {
+    const fetchTest=async()=>{
         /*
-        console.log("실시간 데이터 추출 시작")
+        const numOfRows = 10;
+        const pageNo = 10000;
+
         const response = await fetch(
-            `http://apis.data.go.kr/B553881/Parking/PrkRealtimeInfo?serviceKey=${serviceKey}&numOfRows=10000&pageNo=1&format=2`
+            `http://apis.data.go.kr/B553881/Parking/PrkSttusInfo?&serviceKey=${serviceKey}&numOfRows=${numOfRows}&pageNo=${pageNo}&format=2`
         );
-
-        const text = await response.text();
-        console.log(text); // JSON인지, HTML 에러인지 확인
-        */
+        const result = await response.json();
+        console.log(result);
+        return result.PrkSttusInfo;*/
         try {
-            // 전체 데이터를 가져와서 저장
+            // 본인 발급받은 인증키 입력
+            // ✅ 예시 1: 서울시 전체 주차장 정보 (1~100개)
             const response = await fetch(
-                `http://apis.data.go.kr/B553881/Parking/PrkRealtimeInfo?serviceKey=${serviceKey}&numOfRows=500&pageNo=1&format=2`
+                `http://openapi.seoul.go.kr:8088/56776f4f766b696d3335704f6b434d/json/GetParkInfo/1/1000/`
             );
+
+            // ✅ 예시 2: 특정 자치구 (강남구)
+            // const response = await fetch(
+            //     `http://openapi.seoul.go.kr:8088/${serviceKey}/json/GetParkInfo/1/100/강남`
+            // );
+
+            // ✅ 예시 3: 특정 주차장 코드 (압구정428 공영주차장, 코드: 1033125)
+            // const response = await fetch(
+            //     `http://openapi.seoul.go.kr:8088/${serviceKey}/json/GetParkInfo/1/5//1033125`
+            // );
+
+            // ✅ 예시 4: 미연계 주차장 (코드: 0)
+            // const response = await fetch(
+            //     `http://openapi.seoul.go.kr:8088/${serviceKey}/json/GetParkInfo/1/5///0`
+            // );
+
             const result = await response.json();
-            const list = result.PrkRealtimeInfo || [];
-            console.log(list);
+            console.log(result);
 
-            if (list.length > 0) {
-                await axios.post("/api/live/bulk", list);
-                alert(`${list.length}건 실시간 데이터 DB 저장 완료`);
-                setIsLive(true); // 저장 후 실시간 정보 모드로 전환
-                setPage(0);       // 페이지 초기화
-                fetchLive();      // 테이블 표시
+            // 실제 데이터는 result.GetParkInfo.row 안에 있음
+            if (result.GetParkInfo && result.GetParkInfo.row) {
+                return result.GetParkInfo.row;
             } else {
-                alert("실시간 데이터가 없습니다.");
+                console.error("데이터 없음:", result);
+                return [];
             }
-        } catch (err) {
-            console.error("실시간 데이터 저장 실패", err);
-            alert("실시간 데이터 저장 실패");
+        } catch (error) {
+            console.error("API 호출 오류:", error);
+            return [];
         }
-    };
 
-    const MAX_RETRIES = 3;
-    const RETRY_DELAY_MS = 2000; // 2초 간격으로 재시도
-
-    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     const saveLiveToDB = async () => {
-        console.log("실시간 데이터 추출 시작");
+        try {
 
-        let attempts = 0;
-        let success = false;
-        let responseText = '';
+            // 요청 URL (구로구만 필터링)
+            const response = await fetch(
+                `http://openapi.seoul.go.kr:8088/56776f4f766b696d3335704f6b434d/json/GetParkingInfo/1/1000/`
+            );
 
-        while (attempts < MAX_RETRIES && !success) {
-            try {
-                const response = await fetch(
-                    `http://apis.data.go.kr/B553881/Parking/PrkRealtimeInfo?serviceKey=${serviceKey}&numOfRows=10000&pageNo=1&format=2`
-                );
+            // JSON 파싱
+            const result = await response.json();
+            console.log(result);
 
-                responseText = await response.text();
-                console.log(`응답 시도 ${attempts + 1}:`, responseText);
-
-                // 에러 응답인지 확인 (문자열 파싱)
-                if (responseText.includes('<returnReasonCode>04</returnReasonCode>')) {
-                    throw new Error("공공 API 라우팅 에러 감지됨");
-                }
-
-                // 정상 응답이라면 JSON 파싱 시도
-                const data = JSON.parse(responseText);
-
-                // 실제 데이터를 DB에 저장하는 로직 여기에 추가
-                console.log("데이터 저장 완료:", data);
-
-                success = true; // 성공 처리
-            } catch (err) {
-                console.error(`시도 ${attempts + 1} 실패:`, err.message);
-                attempts += 1;
-                if (attempts < MAX_RETRIES) {
-                    console.log(`${RETRY_DELAY_MS / 1000}초 후 재시도 중...`);
-                    await delay(RETRY_DELAY_MS);
-                } else {
-                    console.error("최대 재시도 횟수 도달. 중단합니다.");
-                }
+            // 실제 데이터는 result.GetParkingInfo.row 안에 있음
+            if (result.GetParkingInfo && result.GetParkingInfo.row) {
+                return result.GetParkingInfo.row;
+            } else {
+                console.error("데이터 없음:", result);
+                return [];
             }
+        } catch (error) {
+            console.error("API 호출 오류:", error);
+            return [];
         }
     };
     useEffect(() => {
@@ -227,6 +222,10 @@ const Admin = () => {
             <button onClick={saveLiveToDB} style={{ marginLeft: "1rem" }}>
                 실시간 정보 저장
             </button>
+            <button onClick={fetchTest} style={{ marginLeft: "1rem" }}>
+                주차장 정보 추출 테스트
+            </button>
+
 
             {/* 검색 */}
             <div style={{ marginBottom: "1rem" }}>

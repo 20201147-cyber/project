@@ -1,0 +1,125 @@
+@import url('./Main.css'); /* 기존 PC용 CSS를 가져와 재사용 */
+
+:root {
+    --mobile-bg: #f6f6f6;
+    --mobile-ink: #3897f0;
+    --mobile-muted: #6b7280;
+    --mobile-panel: #fff;
+    --mobile-soft: #f3f4f6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body, html, #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--mobile-bg);
+}
+
+/* 모바일용 전체 레이아웃 */
+.app-mobile {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* 상단 헤더 */
+.mobile-header {
+    display: flex;
+    flex-direction: column;
+    background: var(--mobile-panel);
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.brand-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'Great Vibes', cursive;
+}
+
+.pill {
+    font-size: 11px;
+    color: var(--mobile-muted);
+    background: var(--mobile-soft);
+    padding: 2px 6px;
+    border-radius: 999px;
+}
+
+.tabs-mobile {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.tab-mobile {
+    flex: 1;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 2px;
+    background: var(--mobile-soft);
+    border: 1px solid #eee;
+    cursor: pointer;
+}
+
+.tab-mobile.active {
+    background: var(--mobile-ink);
+    color: #fff;
+}
+
+/* 지도 영역 */
+.map-mobile {
+    flex: 1;
+    width: 100%;
+    height: 50vh; /* 모바일 화면에서 절반 정도 차지 */
+    background: #dfe7ef;
+}
+
+/* 패널 영역 */
+.panel-mobile {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--mobile-panel);
+    padding: 12px;
+}
+
+/* info window 재활용 */
+.my-infowindow {
+    width: 200px;
+    padding: 8px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-size: 13px;
+}
+
+.my-infowindow h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    color: #0078ff;
+}
+
+.my-infowindow p {
+    margin: 2px 0;
+    font-size: 12px;
+}
+
+/* 모바일 전용 버튼 크기 조정 */
+.primary-btn-center {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 13px;
+}

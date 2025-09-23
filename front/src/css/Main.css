@@ -1,3 +1,4 @@
+/* Main.css */
 :root {
     --bg: #f6f6f6;
     --ink: #3897f0;
@@ -70,6 +71,7 @@ body {
 .brand {
     font-size: 33px;
     font-family: 'Great Vibes', cursive;
+    color: #000;
     font-weight: 800;
     letter-spacing: -.2px;
 }
@@ -364,6 +366,7 @@ body {
         opacity: 1;
     }
 }
+
 /* filter */
 .filter-overlay {
     position: absolute;
@@ -382,8 +385,213 @@ body {
     gap: 6px;
     font-size: 14px;
 }
+
 .filter-overlay label {
     display: flex;
     align-items: center;
     gap: 6px;
 }
+
+/*info window*/
+.my-infowindow {
+    width: 250px;        /* 너비 조절 */
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    font-size: 14px;
+    color: #333;
+}
+
+.my-infowindow h4 {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    color: #0078ff;
+}
+
+.my-infowindow p {
+    margin: 2px 0;
+}
+/* ===== Eazypark custom marker overlay ===== */
+.ep-overlay{
+  min-width: 230px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+  overflow: hidden;
+  font-size: 12px;
+  color: #111827;
+}
+
+.ep-overlay__head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, #3897f0, #60a5fa);
+  color: #fff;
+}
+
+.ep-overlay__title{
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: -.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.ep-overlay__badge{
+  font-size: 11px;
+  background: rgba(255,255,255,.22);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.4);
+}
+
+.ep-overlay__body{
+  padding: 8px 10px;
+}
+
+.ep-row{
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.ep-row + .ep-row{ margin-top: 6px; }
+.ep-row span{ color: #6b7280; font-size: 12px; }
+.ep-row b{ font-weight: 700; }
+
+.ep-kv{
+  display: grid;
+  grid-template-columns: 48px 1fr 48px 1fr 48px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.ep-kv span{ color:#6b7280; font-size:12px; }
+.ep-kv b{ font-weight:800; }
+
+.ep-overlay__actions{
+  padding: 10px 12px;
+  background: #f9fafb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ep-overlay__btn{
+  text-decoration: none;
+  color: #fff;
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+.ep-overlay__btn:hover{ filter: brightness(1.05); }
+
+/* 닫기(X) 버튼 */
+.ep-overlay__head { position: relative; }
+.ep-close{
+  right: 8px;
+  top: 8px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  position: static;      /* grid 자리에 배치 */
+  width: 20px; height: 20px;
+  font-size: 16px; line-height: 1;
+  justify-self: end;     /* 오른쪽 정렬 */
+}
+
+.ep-close:hover{ background: rgba(255,255,255,.18); }
+
+/* ===== Drive mode UI ===== */
+.ep-drive-card{
+  background:#fff;
+  border:1px solid #e8eaf0;
+  border-radius:16px;
+  padding:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  margin-top:12px;
+}
+.ep-drive-top{
+  display:flex; align-items:center; gap:8px;
+}
+.ep-drive-title{
+  font-weight:800; font-size:15px; color:#111827; letter-spacing:-.2px;
+  max-width: calc(100% - 96px);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.ep-drive-route-btn{
+  margin-left:auto;
+  background: var(--ink);
+  color:#fff; border:1px solid var(--ink);
+  padding:8px 12px; border-radius:12px;
+  font-weight:700; font-size:13px; cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+.ep-drive-route-btn:hover { filter:brightness(1.05); }
+
+.ep-drive-badges{
+  display:flex; align-items:center; gap:6px;
+  margin-top:8px; flex-wrap:wrap;
+}
+.badge{
+  display:inline-flex; align-items:center; gap:4px;
+  padding:4px 8px; border-radius:999px; font-size:12px; font-weight:700;
+  border:1px solid #e5e7eb; background:#f9fafb; color:#374151;
+}
+.badge.blue{ background:#e9f2ff; border-color:#d7e6ff; color:#2563eb; }
+.badge.green{ background:#e7f7ee; border-color:#c9f0da; color:#047857; }
+.badge.amber{ background:#fff3d6; border-color:#ffe7ad; color:#b45309; }
+.badge.red{ background:#ffe3e3; border-color:#ffc7c7; color:#b91c1c; }
+.badge.gray{ background:#f3f4f6; border-color:#e5e7eb; color:#6b7280; }
+.badge.outline{ background:#fff; }
+
+.ep-drive-stats{
+  display:grid; grid-template-columns: repeat(3, 1fr);
+  gap:8px; margin-top:10px;
+}
+.ep-stat{
+  background:#f8fafc; border:1px solid #eef2f7; border-radius:12px;
+  padding:8px; text-align:center;
+}
+.ep-stat span{ display:block; font-size:11px; color:#6b7280; }
+.ep-stat b{ display:block; font-size:15px; font-weight:800; color:#111827; }
+
+.ep-meter{
+  position:relative; height:10px; border-radius:999px; overflow:hidden;
+  background:#eef2f7; border:1px solid #e5e7eb; margin-top:10px;
+}
+.ep-meter .fill{ height:100%; width:0; transition:width .25s ease; }
+.ep-meter.green .fill{ background:#22c55e; }
+.ep-meter.amber .fill{ background:#f59e0b; }
+.ep-meter.red .fill{ background:#ef4444; }
+.ep-meter.gray .fill{ background:#9ca3af; }
+.ep-meter .cap{
+  position:absolute; right:8px; top:-18px;
+  font-size:11px; color:#6b7280;
+}
+
+.ep-drive-meta{
+  display:grid; grid-template-columns: 80px 1fr; gap:8px 10px;
+  margin-top:10px; font-size:12px; color:#374151;
+}
+.ep-drive-meta span{ color:#6b7280; }
