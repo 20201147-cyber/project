@@ -104,58 +104,58 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList })
                         const status = getStatus(park);
                         const distanceStr =
                             park.distance < 1
-                            ? `${Math.round(park.distance * 1000)} m`
-                            : `${park.distance.toFixed(2)} km`;
+                                ? `${Math.round(park.distance * 1000)} m`
+                                : `${park.distance.toFixed(2)} km`;
                         const chargeClass = (park.CHDG_FREE_NM || park.CHGD_FREE_NM) === "무료" ? "green" : "blue";
                         const pctText = status.pct ? `${status.pct}%` : "—";
 
                         return (
                             <article key={index} className="ep-drive-card">
-                            <header className="ep-drive-top">
-                                <h4 className="ep-drive-title">{park.PKLT_NM ?? "이름없는 주차장"}</h4>
-                                <button
-                                className="ep-drive-route-btn"
-                                onClick={() => {
-                                    const url = `https://map.kakao.com/link/to/${encodeURIComponent(
-                                    park.PKLT_NM
-                                    )},${park.LAT},${park.LOT}`;
-                                    window.open(url, "_blank");
-                                }}
-                                >
-                                길찾기
-                                </button>
-                            </header>
+                                <header className="ep-drive-top">
+                                    <h4 className="ep-drive-title">{park.PKLT_NM ?? "이름없는 주차장"}</h4>
+                                    <button
+                                        className="ep-drive-route-btn"
+                                        onClick={() => {
+                                            const url = `https://map.kakao.com/link/to/${encodeURIComponent(
+                                                park.PKLT_NM
+                                            )},${park.LAT},${park.LOT}`;
+                                            window.open(url, "_blank");
+                                        }}
+                                    >
+                                        길찾기
+                                    </button>
+                                </header>
 
-                            <div className="ep-drive-badges">
-                                <span className="badge blue">{distanceStr}</span>
-                                <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
-                                <span className={`badge ${status.variant}`}>{status.label}</span>
-                                {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
-                            </div>
+                                <div className="ep-drive-badges">
+                                    <span className="badge blue">{distanceStr}</span>
+                                    <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
+                                    <span className={`badge ${status.variant}`}>{status.label}</span>
+                                    {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
+                                </div>
 
-                            <div className="ep-drive-stats">
-                                <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
-                                <div className="ep-stat"><span>현재</span><b>{park.liveCnt ?? "-"}</b></div>
-                                <div className="ep-stat"><span>남음</span><b>{park.remainCnt ?? "-"}</b></div>
-                            </div>
+                                <div className="ep-drive-stats">
+                                    <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
+                                    <div className="ep-stat"><span>현재</span><b>{park.liveCnt ?? "-"}</b></div>
+                                    <div className="ep-stat"><span>남음</span><b>{park.remainCnt ?? "-"}</b></div>
+                                </div>
 
-                            <div className={`ep-meter ${status.variant}`}>
-                                <div className="fill" style={{ width: `${status.pct}%` }} />
-                                <div className="cap">{pctText}</div>
-                            </div>
+                                <div className={`ep-meter ${status.variant}`}>
+                                    <div className="fill" style={{ width: `${status.pct}%` }} />
+                                    <div className="cap">{pctText}</div>
+                                </div>
 
-                            <div className="ep-drive-meta">
-                                <span>운영시간</span>
-                                <div>{fmtHM(park.WD_OPER_BGNG_TM)} - {fmtHM(park.WD_OPER_END_TM)}</div>
+                                <div className="ep-drive-meta">
+                                    <span>운영시간</span>
+                                    <div>{fmtHM(park.WD_OPER_BGNG_TM)} - {fmtHM(park.WD_OPER_END_TM)}</div>
 
-                                <span>연락처</span>
-                                <div>{park.TELNO ?? "-"}</div>
+                                    <span>연락처</span>
+                                    <div>{park.TELNO ?? "-"}</div>
 
-                                {park.ADDR && (<><span>주소</span><div>{park.ADDR}</div></>)}
-                            </div>
+                                    {park.ADDR && (<><span>주소</span><div>{park.ADDR}</div></>)}
+                                </div>
                             </article>
                         );
-                        })
+                    })
                     : go ? <div>주차장 탐색중...</div> : null}
             </div>
         </div>

@@ -72,8 +72,19 @@ body {
     font-size: 33px;
     font-family: 'Great Vibes', cursive;
     color: #000;
-    font-weight: 800;
     letter-spacing: -.2px;
+}
+
+.sidebar .brand-row .brand {
+  font-size: 50px;   /* 원하는 크기 */
+  font-weight: 100;
+  line-height: 1;
+}
+
+.mobile-header .brand-row .brand {
+  font-size: 50px;   /* 원하는 크기 */
+  font-weight: 100;
+  line-height: 1;
 }
 
 .pill {
@@ -414,53 +425,53 @@ body {
 }
 /* ===== Eazypark custom marker overlay ===== */
 .ep-overlay{
-  min-width: 230px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  box-shadow: 0 12px 28px rgba(0,0,0,.18);
-  overflow: hidden;
-  font-size: 12px;
-  color: #111827;
+    min-width: 230px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.18);
+    overflow: hidden;
+    font-size: 12px;
+    color: #111827;
 }
 
 .ep-overlay__head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  background: linear-gradient(135deg, #3897f0, #60a5fa);
-  color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, #3897f0, #60a5fa);
+    color: #fff;
 }
 
 .ep-overlay__title{
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: -.2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: -.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
 }
 
 .ep-overlay__badge{
-  font-size: 11px;
-  background: rgba(255,255,255,.22);
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.4);
+    font-size: 11px;
+    background: rgba(255,255,255,.22);
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.4);
 }
 
 .ep-overlay__body{
-  padding: 8px 10px;
+    padding: 8px 10px;
 }
 
 .ep-row{
-  display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 10px;
-  align-items: center;
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 10px;
+    align-items: center;
 }
 
 .ep-row + .ep-row{ margin-top: 6px; }
@@ -468,35 +479,35 @@ body {
 .ep-row b{ font-weight: 700; }
 
 .ep-kv{
-  display: grid;
-  grid-template-columns: 48px 1fr 48px 1fr 48px 1fr;
-  gap: 8px;
-  align-items: center;
-  padding-bottom: 6px;
-  margin-bottom: 8px;
-  border-bottom: 1px dashed #e5e7eb;
+    display: grid;
+    grid-template-columns: 48px 1fr 48px 1fr 48px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #e5e7eb;
 }
 
 .ep-kv span{ color:#6b7280; font-size:12px; }
 .ep-kv b{ font-weight:800; }
 
 .ep-overlay__actions{
-  padding: 10px 12px;
-  background: #f9fafb;
-  display: flex;
-  justify-content: flex-end;
+    padding: 10px 12px;
+    background: #f9fafb;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .ep-overlay__btn{
-  text-decoration: none;
-  color: #fff;
-  background: var(--ink);
-  border: 1px solid var(--ink);
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 13px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    text-decoration: none;
+    color: #fff;
+    background: var(--ink);
+    border: 1px solid var(--ink);
+    padding: 6px 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
 
 .ep-overlay__btn:hover{ filter: brightness(1.05); }
@@ -504,59 +515,59 @@ body {
 /* 닫기(X) 버튼 */
 .ep-overlay__head { position: relative; }
 .ep-close{
-  right: 8px;
-  top: 8px;
-  height: 24px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #fff;
-  font-weight: 800;
-  line-height: 1;
-  cursor: pointer;
-  position: static;      /* grid 자리에 배치 */
-  width: 20px; height: 20px;
-  font-size: 16px; line-height: 1;
-  justify-self: end;     /* 오른쪽 정렬 */
+    right: 8px;
+    top: 8px;
+    height: 24px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #fff;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+    position: static;      /* grid 자리에 배치 */
+    width: 20px; height: 20px;
+    font-size: 16px; line-height: 1;
+    justify-self: end;     /* 오른쪽 정렬 */
 }
 
 .ep-close:hover{ background: rgba(255,255,255,.18); }
 
 /* ===== Drive mode UI ===== */
 .ep-drive-card{
-  background:#fff;
-  border:1px solid #e8eaf0;
-  border-radius:16px;
-  padding:12px;
-  box-shadow:0 6px 18px rgba(0,0,0,.06);
-  margin-top:12px;
+    background:#fff;
+    border:1px solid #e8eaf0;
+    border-radius:16px;
+    padding:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    margin-top:12px;
 }
 .ep-drive-top{
-  display:flex; align-items:center; gap:8px;
+    display:flex; align-items:center; gap:8px;
 }
 .ep-drive-title{
-  font-weight:800; font-size:15px; color:#111827; letter-spacing:-.2px;
-  max-width: calc(100% - 96px);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-weight:800; font-size:15px; color:#111827; letter-spacing:-.2px;
+    max-width: calc(100% - 96px);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .ep-drive-route-btn{
-  margin-left:auto;
-  background: var(--ink);
-  color:#fff; border:1px solid var(--ink);
-  padding:8px 12px; border-radius:12px;
-  font-weight:700; font-size:13px; cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,.12);
+    margin-left:auto;
+    background: var(--ink);
+    color:#fff; border:1px solid var(--ink);
+    padding:8px 12px; border-radius:12px;
+    font-weight:700; font-size:13px; cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,.12);
 }
 .ep-drive-route-btn:hover { filter:brightness(1.05); }
 
 .ep-drive-badges{
-  display:flex; align-items:center; gap:6px;
-  margin-top:8px; flex-wrap:wrap;
+    display:flex; align-items:center; gap:6px;
+    margin-top:8px; flex-wrap:wrap;
 }
 .badge{
-  display:inline-flex; align-items:center; gap:4px;
-  padding:4px 8px; border-radius:999px; font-size:12px; font-weight:700;
-  border:1px solid #e5e7eb; background:#f9fafb; color:#374151;
+    display:inline-flex; align-items:center; gap:4px;
+    padding:4px 8px; border-radius:999px; font-size:12px; font-weight:700;
+    border:1px solid #e5e7eb; background:#f9fafb; color:#374151;
 }
 .badge.blue{ background:#e9f2ff; border-color:#d7e6ff; color:#2563eb; }
 .badge.green{ background:#e7f7ee; border-color:#c9f0da; color:#047857; }
@@ -566,19 +577,19 @@ body {
 .badge.outline{ background:#fff; }
 
 .ep-drive-stats{
-  display:grid; grid-template-columns: repeat(3, 1fr);
-  gap:8px; margin-top:10px;
+    display:grid; grid-template-columns: repeat(3, 1fr);
+    gap:8px; margin-top:10px;
 }
 .ep-stat{
-  background:#f8fafc; border:1px solid #eef2f7; border-radius:12px;
-  padding:8px; text-align:center;
+    background:#f8fafc; border:1px solid #eef2f7; border-radius:12px;
+    padding:8px; text-align:center;
 }
 .ep-stat span{ display:block; font-size:11px; color:#6b7280; }
 .ep-stat b{ display:block; font-size:15px; font-weight:800; color:#111827; }
 
 .ep-meter{
-  position:relative; height:10px; border-radius:999px; overflow:hidden;
-  background:#eef2f7; border:1px solid #e5e7eb; margin-top:10px;
+    position:relative; height:10px; border-radius:999px; overflow:hidden;
+    background:#eef2f7; border:1px solid #e5e7eb; margin-top:10px;
 }
 .ep-meter .fill{ height:100%; width:0; transition:width .25s ease; }
 .ep-meter.green .fill{ background:#22c55e; }
@@ -586,12 +597,265 @@ body {
 .ep-meter.red .fill{ background:#ef4444; }
 .ep-meter.gray .fill{ background:#9ca3af; }
 .ep-meter .cap{
-  position:absolute; right:8px; top:-18px;
-  font-size:11px; color:#6b7280;
+    position:absolute; right:8px; top:-18px;
+    font-size:11px; color:#6b7280;
 }
 
 .ep-drive-meta{
-  display:grid; grid-template-columns: 80px 1fr; gap:8px 10px;
-  margin-top:10px; font-size:12px; color:#374151;
+    display:grid; grid-template-columns: 80px 1fr; gap:8px 10px;
+    margin-top:10px; font-size:12px; color:#374151;
 }
 .ep-drive-meta span{ color:#6b7280; }
+
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); /* 어두운 배경 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 50vw;     /* 화면 가로의 50% */
+    height: 50vh;    /* 화면 세로의 50% */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.modal-content > div {
+    flex: 1; /* ParkingChart가 차지하는 영역 */
+}
+
+.modal-close {
+    align-self: flex-end;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #3897f0;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.modal-close:hover {
+    background: #2563eb;
+}
+/* ===== UI polish v1 (append at end of Main.css) ===== */
+
+/* 1) 디자인 토큰 */
+:root{
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease: cubic-bezier(.2,.7,.2,1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+
+  --radius: 14px;
+  --shadow-1: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-2: 0 6px 18px rgba(0,0,0,.12);
+  --shadow-3: 0 12px 28px rgba(0,0,0,.18);
+}
+
+/* 2) 인터랙션 기본: 버튼/링크/탭 공통 트랜지션 */
+button, .link-btn, .tab, .small-btn, .swap-btn,
+.primary-btn, .primary-btn-center, .ghost-btn,
+.ep-overlay__btn, .ep-drive-route-btn {
+  transition:
+    background-color var(--dur-2) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    opacity var(--dur-1) var(--ease-out),
+    filter var(--dur-1) var(--ease-out);
+  will-change: transform, box-shadow, background-color;
+}
+
+/* 3) 포커스 접근성(키보드) */
+button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
+.ep-overlay__btn:focus-visible, .ep-drive-route-btn:focus-visible,
+.primary-btn:focus-visible, .primary-btn-center:focus-visible, .ghost-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ink), transparent 70%),
+    0 0 0 1px var(--ink) inset;
+}
+
+/* 4) Primary 버튼 (hover 시 “배경만” 더 투명하게) */
+.primary-btn, .primary-btn-center{
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  transform: translateY(0);
+}
+.primary-btn:hover, .primary-btn-center:hover{
+  /* Fallback(구형 브라우저): 살짝 밝게 */
+  filter: brightness(1.03);
+  /* 신형(지원 브라우저): 배경 투명도 부여 */
+  background: color-mix(in srgb, var(--ink), transparent 12%);
+  border-color: color-mix(in srgb, var(--ink), transparent 12%);
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+  transform: translateY(-1px);
+}
+.primary-btn:active, .primary-btn-center:active{
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(0,0,0,.12);
+  filter: brightness(.98);
+}
+.primary-btn:disabled, .primary-btn-center:disabled{
+  opacity: .55; cursor: not-allowed; box-shadow: none; transform:none;
+}
+
+/* 5) Ghost / Swap / Small 버튼들 */
+.ghost-btn{
+  background: var(--soft);
+}
+.ghost-btn:hover{
+  background: color-mix(in srgb, var(--soft), transparent 30%); /* 배경만 투명해 보이는 느낌 */
+  border-color: #e3e6ea;
+}
+.swap-btn:hover, .small-btn:hover{
+  background: #fff;
+  border-color: #e1e5ea;
+  box-shadow: var(--shadow-1);
+  transform: translateY(-1px);
+}
+.swap-btn:active, .small-btn:active{ transform: translateY(0); }
+
+/* 6) 상단 링크 버튼(관리자/로그인/모바일) – 유리효과 + 호버 */
+.header-links{ gap: 10px; }
+.link-btn{
+  backdrop-filter: blur(8px);
+  background: rgba(255,255,255,.92);
+  border-color: #e3e5ea;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+.link-btn:hover{
+  background: rgba(255,255,255,.82);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+.link-btn:active{ transform: translateY(0); }
+
+/* 7) 탭 – 호버/액티브 미세 인터랙션 */
+.tab{
+  border-radius: 12px;
+}
+.tab:hover{
+  background: color-mix(in srgb, var(--soft), white 30%);
+  border-color: #e6e8ec;
+  transform: translateY(-1px);
+}
+.tab.active{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+}
+
+/* 8) 카드/리스트 – 살짝 떠오르는 효과 */
+.card, .list, .stat-card, .ep-drive-card{
+  transition: box-shadow var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.card:hover, .stat-card:hover{
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.list:hover{ box-shadow: var(--shadow-2); }
+
+/* 9) 주행 카드 강화 */
+.ep-drive-card{
+  border:1px solid #e8eaf0;
+  box-shadow: var(--shadow-1);
+}
+.ep-drive-card:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+  border-color:#dde3ee;
+}
+.ep-drive-route-btn{
+  transition: all var(--dur-2) var(--ease-out);
+}
+.ep-drive-route-btn:hover{
+  background: color-mix(in srgb, var(--ink), transparent 12%);
+  border-color: color-mix(in srgb, var(--ink), transparent 12%);
+  transform: translateY(-1px);
+}
+.ep-drive-route-btn:active{ transform: translateY(0); }
+
+/* 10) 게이지(남은자리) – 부드러운 변화 */
+.ep-meter .fill{ transition: width .25s var(--ease-out); }
+
+/* 11) 오버레이(마커 상세) – 등장 애니메이션 & 버튼 호버 */
+@keyframes ep-pop {
+  from { opacity: 0; transform: translateY(6px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.ep-overlay{
+  animation: ep-pop .18s var(--ease-out);
+  border: 1px solid #e8eaf0;
+  box-shadow: var(--shadow-3);
+}
+.ep-overlay__btn{
+  background: var(--ink);
+  border: 1px solid var(--ink);
+}
+.ep-overlay__btn:hover{
+  background: color-mix(in srgb, var(--ink), transparent 12%);
+  border-color: color-mix(in srgb, var(--ink), transparent 12%);
+  transform: translateY(-1px);
+}
+.ep-overlay__btn:active{ transform: translateY(0); }
+
+/* 12) 모달 – 입장/퇴장 느낌 */
+.modal-content{
+  animation: ep-pop .22s var(--ease-out);
+  border: 1px solid #e8eaf0;
+}
+.modal-close{
+  transition: all var(--dur-2) var(--ease-out);
+}
+.modal-close:hover{
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+.modal-close:active{ transform: translateY(0); }
+
+/* 13) 브랜드 타이포도 살짝 정리(두께는 400 유지) */
+.sidebar .brand-row .brand{
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.2px;
+  text-rendering: optimizeLegibility;
+}
+
+/* 14) 모션 최소화 환경 고려 */
+@media (prefers-reduced-motion: reduce){
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ---- Fix: active 탭은 hover 때도 잉크색 유지 ---- */
+.tabs .tab:not(.active):hover{
+  background: color-mix(in srgb, var(--soft), white 30%);
+  border-color: #e6e8ec;
+  transform: translateY(-1px);
+}
+
+.tabs .tab.active,
+.tabs .tab.active:hover,
+.tabs .tab.active:focus-visible{
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  transform: translateY(-1px);
+}

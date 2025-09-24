@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import FavoritesPanel from "./FavoritesPanel";
+import ParkingChart from "../ParkingChart";
 
 export default function DestinationPanel({ map, coordinates }) {
     const [start, setStart] = useState("");

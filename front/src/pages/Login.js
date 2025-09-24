@@ -24,7 +24,7 @@ const Login = () => {
             <div className="login-right">
                 <div className="login-page">
                     <Link to="/">메인 페이지로</Link>
-                    <h1 className="logo-text">Eazypark</h1>
+                    <h1 className="logo-text">Ezpark</h1>
 
                     <form>
                         <fieldset>아이디 <input type="text" /></fieldset>
