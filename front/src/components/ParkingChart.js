@@ -1,101 +1,126 @@
-import React, { useEffect, useState } from "react";
-import Papa from "papaparse";
+// /src/components/ParkingChart.js
+import React, { useMemo } from "react";
 import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-    ReferenceDot,
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, ReferenceDot,
 } from "recharts";
+import "../css/ParkingChart.css";
 
-export default function ParkingChart() {
-    const [data, setData] = useState([]);
+const COLORS = {
+  live: "var(--pc-ink)",
+  remain: "#10b981",
+  grid: "#eef2f7",
+  axis: "#6b7280",
+  axisLine: "#e5e7eb",
+};
 
-    useEffect(() => {
-        Papa.parse("/20250922.csv", {
-            download: true,
-            header: true,
-            complete: (result) => {
-                const filtered = result.data.filter(
-                    (row) => row.PKLT_NM && row.PKLT_NM.includes("종묘주차장")
-                );
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  const live = payload.find(p => p.dataKey === "liveCnt")?.value;
+  const remain = payload.find(p => p.dataKey === "remainCnt")?.value;
+  return (
+    <div className="pc-tooltip" role="dialog" aria-label="차트 툴팁">
+      <div className="pc-tip-time">{label}</div>
+      <div className="pc-tip-row"><span className="pc-badge live">주차</span><b>{live ?? "–"}</b>대</div>
+      <div className="pc-tip-row"><span className="pc-badge remain">남음</span><b>{remain ?? "–"}</b>대</div>
+    </div>
+  );
+}
 
-                const formatted = filtered.map((row) => ({
-                    time: row.timestamp ? row.timestamp.split(" ")[1].slice(0, 5) : "",
-                    liveCnt: Number(row.liveCnt) || 0,
-                    remainCnt: Number(row.remainCnt) || 0,
-                }));
+export default function ParkingChart({ parkName, csvDataByName }) {
+  // 해당 주차장 데이터만
+  const data = useMemo(
+    () => (csvDataByName?.[parkName] || []).filter(Boolean),
+    [csvDataByName, parkName]
+  );
 
-                setData(formatted);
-            },
-            error: (err) => {
-                console.error("CSV 파싱 에러:", err);
-            },
-        });
-    }, []);
+  const points = data.length;
+  const last = points ? data[points - 1] : null;
 
-    // 최대값/최소값 계산
-    const maxLive = data.length ? Math.max(...data.map(d => d.liveCnt)) : 0;
-    const minLive = data.length ? Math.min(...data.map(d => d.liveCnt)) : 0;
-    const maxPoint = data.find(d => d.liveCnt === maxLive);
-    const minPoint = data.find(d => d.liveCnt === minLive);
+  const maxLive = points ? Math.max(...data.map(d => d.liveCnt)) : null;
+  const minLive = points ? Math.min(...data.map(d => d.liveCnt)) : null;
+  const maxPoint = points ? data.find(d => d.liveCnt === maxLive) : null;
+  const minPoint = points ? data.find(d => d.liveCnt === minLive) : null;
 
-    return (
-        <div style={{ width: "100%", height: 400 }}>
-            <div>2025-09-22</div>
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                        type="monotone"
-                        dataKey="liveCnt"
-                        stroke="#1f77b4"
-                        name="주차된 차량"
-                        dot={{ r: 3 }}
-                    />
-                    <Line
-                        type="monotone"
-                        dataKey="remainCnt"
-                        stroke="#ff7f0e"
-                        name="남은 자리"
-                        dot={{ r: 3 }}
-                    />
-
-                    {/* 최대값 점 */}
-                    {maxPoint && (
-                        <ReferenceDot
-                            x={maxPoint.time}
-                            y={maxPoint.liveCnt}
-                            r={6}
-                            fill="red"
-                            stroke="none"
-                            label={{ value: `최대: ${maxPoint.liveCnt}`, position: 'top' }}
-                        />
-                    )}
-
-                    {/* 최소값 점 */}
-                    {minPoint && (
-                        <ReferenceDot
-                            x={minPoint.time}
-                            y={minPoint.liveCnt}
-                            r={6}
-                            fill="green"
-                            stroke="none"
-                            label={{ value: `최소: ${minPoint.liveCnt}`, position: 'bottom' }}
-                        />
-                    )}
-                </LineChart>
-            </ResponsiveContainer>
-            <div>가장 혼잡한 시간대:14시 13분</div>
-            <div></div>
+  return (
+    <div className="pc-wrap" role="region" aria-label={`${parkName} 주차장 상세`}>
+      {/* Header */}
+      <div className="pc-header">
+        <h3 className="pc-title">{parkName}</h3>
+        <div className="pc-stats">
+          <span className="pc-chip"><span className="pc-dot live" />현재 주차 {last?.liveCnt ?? "–"}대</span>
+          <span className="pc-chip"><span className="pc-dot remain" />남은 자리 {last?.remainCnt ?? "–"}대</span>
         </div>
-    );
+      </div>
+
+      {/* Chart */}
+      {points === 0 ? (
+        <div className="pc-empty">
+          <div className="pc-skel" style={{ width: "60%" }} />
+          <div className="pc-skel" style={{ width: "90%" }} />
+          <div className="pc-skel" style={{ width: "75%" }} />
+          <div className="pc-skel" style={{ width: "85%" }} />
+        </div>
+      ) : (
+        <div className="pc-chart">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 16, right: 16, left: 8, bottom: 10 }}>
+              <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="time"
+                tick={{ fontSize: 12, fill: COLORS.axis }}
+                tickMargin={8}
+                axisLine={{ stroke: COLORS.axisLine }}
+                tickLine={{ stroke: COLORS.axisLine }}
+              />
+              <YAxis
+                allowDecimals={false}
+                width={42}
+                tick={{ fontSize: 12, fill: COLORS.axis }}
+                axisLine={{ stroke: COLORS.axisLine }}
+                tickLine={{ stroke: COLORS.axisLine }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+
+              {/* Lines */}
+              <Line
+                type="monotone"
+                dataKey="liveCnt"
+                name="주차된 차량"
+                stroke={COLORS.live}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="remainCnt"
+                name="남은 자리"
+                stroke={COLORS.remain}
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5 }}
+              />
+
+              {/* Peaks (간단 표식) */}
+              {maxPoint && (
+                <ReferenceDot x={maxPoint.time} y={maxPoint.liveCnt} r={4} fill="var(--pc-ink)" />
+              )}
+              {minPoint && (
+                <ReferenceDot x={minPoint.time} y={minPoint.liveCnt} r={4} fill="#ef4444" />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* 보조 설명 */}
+      {points > 0 && (
+        <div className="pc-peak-note">
+          {maxPoint && <span className="pc-note">피크: {maxPoint.time} / {maxPoint.liveCnt}대</span>}
+          {minPoint && <span className="pc-note">로우: {minPoint.time} / {minPoint.liveCnt}대</span>}
+        </div>
+      )}
+    </div>
+  );
 }

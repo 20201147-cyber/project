@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Owner from "./pages/Owner";
 import Main from "./components/Main";
 import MainMobile from "./components/MainMobile";
+import Tmap from "./pages/Tmap";
 
 // 라우팅 컴포넌트
 const App = () => (
@@ -18,6 +19,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/owner" element={<Owner />} />
             <Route path="/mobile" element={<MainMobile />} />
+            <Route path="/tmap" element={<Tmap />} />
         </Routes>
     </BrowserRouter>
 );

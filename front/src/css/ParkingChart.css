@@ -1,1 +1,140 @@
-/* ParkingChart.css */
+/* ParkingChart.css – Eazypark 상세페이지 스타일 */
+:root {
+  /* 차트 전용 토큰 (사이트 토큰과 조화) */
+  --pc-ink: var(--ink, #3897f0);
+  --pc-remain: #10b981;            /* 남은자리 = 그린 */
+  --pc-axis: #6b7280;
+  --pc-grid: #eef2f7;
+  --pc-border: #e5e7eb;
+  --pc-bg: #fff;
+  --pc-soft: var(--soft, #f3f4f6);
+  --pc-muted: var(--muted, #6b7280);
+  --pc-shadow: 0 12px 28px rgba(0,0,0,.18);
+  --pc-radius: 14px;
+  --pc-ease: cubic-bezier(.2,.7,.2,1);
+}
+
+/* 래퍼 */
+.pc-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 320px;
+  background: var(--pc-bg);
+}
+
+/* 헤더 */
+.pc-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 6px 10px;
+  border-bottom: 1px dashed var(--pc-border);
+  padding-bottom: 8px;
+}
+.pc-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -.2px;
+  background: linear-gradient(135deg, var(--pc-ink), #60a5fa);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.pc-subtitle {
+  font-size: 12px;
+  color: var(--pc-muted);
+  text-align: right;
+}
+.pc-stats {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--pc-border);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+}
+.pc-dot {
+  width: 8px; height: 8px; border-radius: 999px;
+}
+.pc-dot.live { background: var(--pc-ink); }
+.pc-dot.remain { background: var(--pc-remain); }
+
+/* 차트 영역 */
+.pc-chart {
+  flex: 1;
+  min-height: 260px;
+}
+
+/* 툴팁 */
+.pc-tooltip {
+  background: rgba(255,255,255,.98);
+  border: 1px solid var(--pc-border);
+  border-radius: var(--pc-radius);
+  box-shadow: var(--pc-shadow);
+  padding: 8px 10px;
+}
+.pc-tooltip .pc-tip-time {
+  font-size: 12px;
+  color: var(--pc-muted);
+  margin-bottom: 6px;
+}
+.pc-tooltip .pc-tip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.pc-tooltip .pc-badge {
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  border: 1px solid var(--pc-border);
+}
+.pc-tooltip .pc-badge.live { color: var(--pc-ink); background: #eef4ff; }
+.pc-tooltip .pc-badge.remain { color: var(--pc-remain); background: #e9fbf4; }
+
+/* 피크/로우 안내칩 */
+.pc-peak-note {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pc-note {
+  font-size: 11px;
+  color: var(--pc-muted);
+  background: var(--pc-soft);
+  border: 1px solid var(--pc-border);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+/* 빈 상태 */
+.pc-empty {
+  display: grid;
+  gap: 10px;
+  padding: 18px 10px;
+}
+.pc-skel {
+  height: 10px;
+  background: linear-gradient(90deg, #f3f4f6, #eef2f7, #f3f4f6);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: pc-shimmer 1.2s infinite var(--pc-ease);
+}
+@keyframes pc-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

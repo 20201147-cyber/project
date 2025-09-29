@@ -109,7 +109,7 @@ export default function MainMobile() {
         <div className="app-mobile">
             <header className="mobile-header">
                 <div className="brand-row">
-                    <div className="brand">Ezpark</div>
+                    <div className="brand">Eazypark</div>
                     <span className="pill">Beta</span>
                 </div>
                 <div className="tabs-mobile">

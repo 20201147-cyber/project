@@ -15,9 +15,14 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
     return R * c; // km 단위
 };
 
-export default function DrivePanel({ map, go, setGO, coordinates, ParkingList }) {
+export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, routeInfo, setRouteInfo }) {
     const [nearbyParking, setNearbyParking] = useState([]);
+    const [originalDestination, setOriginalDestination] = useState(routeInfo?.destination ?? null);
 
+    // routeInfo 존재 시 남은 거리/시간 표시
+    const remainingDistance = routeInfo?.distance ?? "-";
+    const remainingTime = routeInfo?.time ?? "-";
+    const destinationName = routeInfo?.destination ?? "미설정";
     const fmtHM = (s) => (s && s.length === 4) ? `${s.slice(0,2)}:${s.slice(2)}` : "-";
 
     const getStatus = (park) => {
@@ -33,6 +38,77 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList })
     // 주행모드 on/off
     const handleSafeDriveClick = () => {
         setGO(prev => !prev);
+        // 주행모드 시작 시 현재 목적지 저장
+        if (!go && routeInfo?.destination) {
+            setOriginalDestination(routeInfo.destination);
+        }
+    };
+
+    // 원래 목적지로 돌아가기
+    const handleReturnToOriginal = async () => {
+        if (!map || !originalDestination) return;
+        const destPark = ParkingList.find(p => p.PKLT_NM === originalDestination);
+        if (!destPark) return;
+
+        const startX = coordinates.lng;
+        const startY = coordinates.lat;
+        const endX = parseFloat(destPark.LOT);
+        const endY = parseFloat(destPark.LAT);
+
+        try {
+            const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
+                },
+                body: JSON.stringify({
+                    startX,
+                    startY,
+                    endX,
+                    endY,
+                    reqCoordType: "WGS84GEO",
+                    resCoordType: "WGS84GEO"
+                })
+            });
+
+            const data = await res.json();
+            if (!data.features || !data.features.length) return;
+
+            let pathPoints = [];
+            let totalTime = "-";
+            let totalDistance = "-";
+
+            data.features.forEach((feature) => {
+                const props = feature.properties;
+                if (props.totalTime) {
+                    totalTime = props.totalTime;
+                    totalDistance = props.totalDistance;
+                }
+                if (feature.geometry?.type === "LineString") {
+                    feature.geometry.coordinates.forEach(([lon, lat]) => {
+                        pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
+                    });
+                }
+            });
+
+            if (window.currentRouteLine) window.currentRouteLine.setMap(null);
+            const polyline = new window.kakao.maps.Polyline({
+                path: pathPoints,
+                strokeWeight: 5,
+                strokeColor: "#3897f0",
+                strokeOpacity: 1,
+                strokeStyle: "solid"
+            });
+            polyline.setMap(map);
+            window.currentRouteLine = polyline;
+
+            const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
+            const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
+            setRouteInfo({ distance: distKm, time: timeMin, destination: originalDestination });
+        } catch (err) {
+            console.error("원래 목적지 길찾기 실패:", err);
+        }
     };
 
     // 지도 줌/이동 제한
@@ -92,7 +168,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList })
             <div className="section-title">주행 모드</div>
             <div className="card">
                 <div className="subtle">현재 목적지</div>
-                <div style={{ marginTop: 6, fontWeight: 600 }}>목적지 미설정</div>
+                <div style={{ marginTop: 6, fontWeight: 600 }}>{destinationName}</div>
             </div>
             <button className="primary-btn-center" onClick={handleSafeDriveClick}>
                 {go ? "안심 주행 종료" : "안심 주행"}
@@ -115,14 +191,75 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList })
                                     <h4 className="ep-drive-title">{park.PKLT_NM ?? "이름없는 주차장"}</h4>
                                     <button
                                         className="ep-drive-route-btn"
-                                        onClick={() => {
-                                            const url = `https://map.kakao.com/link/to/${encodeURIComponent(
-                                                park.PKLT_NM
-                                            )},${park.LAT},${park.LOT}`;
-                                            window.open(url, "_blank");
+                                        onClick={async () => {
+                                            if (!map) return;
+                                            const parkLat = parseFloat(park.LAT);
+                                            const parkLng = parseFloat(park.LOT);
+
+                                            const startX = coordinates.lng;
+                                            const startY = coordinates.lat;
+                                            const endX = parkLng;
+                                            const endY = parkLat;
+
+                                            try {
+                                                const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
+                                                    method: "POST",
+                                                    headers: {
+                                                        "Content-Type": "application/json",
+                                                        "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
+                                                    },
+                                                    body: JSON.stringify({
+                                                        startX,
+                                                        startY,
+                                                        endX,
+                                                        endY,
+                                                        reqCoordType: "WGS84GEO",
+                                                        resCoordType: "WGS84GEO"
+                                                    })
+                                                });
+
+                                                const data = await res.json();
+                                                if (!data.features || !data.features.length) return;
+
+                                                let pathPoints = [];
+                                                let totalTime = "-";
+                                                let totalDistance = "-";
+
+                                                data.features.forEach((feature) => {
+                                                    const props = feature.properties;
+                                                    if (props.totalTime) {
+                                                        totalTime = props.totalTime;
+                                                        totalDistance = props.totalDistance;
+                                                    }
+
+                                                    if (feature.geometry?.type === "LineString") {
+                                                        feature.geometry.coordinates.forEach(([lon, lat]) => {
+                                                            pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
+                                                        });
+                                                    }
+                                                });
+
+                                                if (window.currentRouteLine) window.currentRouteLine.setMap(null);
+
+                                                const polyline = new window.kakao.maps.Polyline({
+                                                    path: pathPoints,
+                                                    strokeWeight: 5,
+                                                    strokeColor: "#3897f0",
+                                                    strokeOpacity: 1,
+                                                    strokeStyle: "solid"
+                                                });
+                                                polyline.setMap(map);
+                                                window.currentRouteLine = polyline;
+
+                                                const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
+                                                const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
+                                                setRouteInfo({ distance: distKm, time: timeMin, destination: park.PKLT_NM });
+                                            } catch (err) {
+                                                console.error("경로 탐색 실패:", err);
+                                            }
                                         }}
                                     >
-                                        길찾기
+                                        경로탐색
                                     </button>
                                 </header>
 
@@ -158,6 +295,46 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList })
                     })
                     : go ? <div>주차장 탐색중...</div> : null}
             </div>
+
+            {/* 하단 모달 */}
+            {routeInfo?.destination && (
+                <div style={{
+                    position: "fixed",
+                    bottom: 20,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "rgba(0,0,0,0.8)",
+                    color: "#fff",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    fontSize: 14,
+                    zIndex: 999,
+                    display: "flex",
+                    gap: 12,
+                    alignItems: "center"
+                }}>
+                    <span style={{ fontWeight: "bold" }}>{routeInfo.destination}</span>까지 &nbsp;
+                    거리: {remainingDistance} km / 예상 시간: {remainingTime} 분
+
+                    {/* 원래 목적지 버튼 */}
+                    {originalDestination && routeInfo.destination !== originalDestination && (
+                        <button
+                            style={{
+                                padding: "2px 8px",
+                                fontSize: 12,
+                                borderRadius: 4,
+                                border: "none",
+                                cursor: "pointer",
+                                background: "#fff",
+                                color: "#000"
+                            }}
+                            onClick={handleReturnToOriginal}
+                        >
+                            원래 목적지로
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
