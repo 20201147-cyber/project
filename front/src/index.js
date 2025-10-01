@@ -2,7 +2,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import KaKaoMap from "./KaKaoMap";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Owner from "./pages/Owner";
@@ -19,7 +18,6 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/owner" element={<Owner />} />
             <Route path="/mobile" element={<MainMobile />} />
-            <Route path="/tmap" element={<Tmap />} />
         </Routes>
     </BrowserRouter>
 );

@@ -993,18 +993,27 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
   position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
   z-index: 25; pointer-events: none; /* 맵 제스처 유지 */
 }
-.route-toast{
-  pointer-events:auto;
-  display:flex; align-items:center; gap:12px;
-  background: rgba(17,24,39,.92);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:14px;
-  padding:12px 14px;
+/* === Route Toast (canonical) === */
+.route-toast {
+  /* 크기: 내용에 맞추되 화면 넘지 않기 */
+  width: fit-content;
+  max-width: min(92vw, 720px);
+  /* 여백/그리드 */
+  padding: 8px 10px;
+  gap: 10px;
+
+  /* 기존 스타일 유지 */
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  background: rgba(17,24,39,.95);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
   box-shadow: 0 20px 40px rgba(0,0,0,.28);
   backdrop-filter: blur(8px);
-  max-width: min(92vw, 820px);
 }
+
 .rt-left{ display:flex; flex-direction:column; gap:6px; }
 .rt-dest{
   font-weight:800; font-size:15px; line-height:1.2; letter-spacing:-.2px;
@@ -1015,11 +1024,11 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 .rt-badges{ display:flex; flex-wrap:wrap; gap:8px; }
 .rt-chip{
   display:inline-flex; align-items:center; gap:6px;
-  height:30px; padding:0 10px;
+  height:26px; padding:0 8px;
   border-radius:9999px;
   background: rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.18);
-  font-weight:800; font-size:13px; color:#fff;
+  font-weight:800; font-size:12px; color:#fff;
 }
 .rt-close{
   width:30px; height:30px; border-radius:8px;
@@ -1030,7 +1039,6 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 }
 .rt-close:hover{ transform:translateY(-1px); background:rgba(255,255,255,.12); }
 @media (max-width: 720px){
-  .route-toast{ padding:10px 12px; }
   .rt-chip{ height:28px; padding:0 9px; font-size:12px; }
 }
 
@@ -1066,7 +1074,7 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
   gap:12px;
 }
 .rt-ico{
-  width:32px; height:32px; border-radius:10px;
+  width: 28px; height: 28px; border-radius: 8px;
   display:grid; place-items:center;
   border:1px solid rgba(255,255,255,.2);
   background: rgba(255,255,255,.06);
@@ -1074,11 +1082,22 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
   cursor:pointer; color:#fff;
 }
 .rt-ico:hover{ transform:translateY(-1px); background: rgba(255,255,255,.12); }
-.rt-ico svg{ width:18px; height:18px; }
+.rt-ico svg{ width:16px; height:16px; }
 
-.rt-center{ display:flex; flex-direction:column; gap:4px; min-width:min(56vw, 520px); }
+.rt-center {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+  align-items: center;
+  text-align: center;
+  /* 핵심 */
+  min-width: unset !important;
+  max-width: 56vw;
+}
+
 .rt-line1{
-  font-weight:800; font-size:14px; line-height:1.2; letter-spacing:-.2px;
+  font-weight:800; font-size:13px; line-height:1.2; letter-spacing:-.2px;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   opacity:.95;
 }
@@ -1087,11 +1106,11 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 .rt-line2{ display:flex; align-items:baseline; gap:10px; }
 .rt-time{
-  font-size:20px; font-weight:900; letter-spacing:.2px; line-height:1;
+  font-size:18px; font-weight:900; letter-spacing:.2px; line-height:1;
 }
 .rt-gap{ width:10px; height:1px; opacity:0; } /* 간격 확보용 */
 .rt-dist{
-  font-size:18px; font-weight:800; line-height:1;
+  font-size:16px; font-weight:800; line-height:1;
 }
 .rt-dist em{ font-size:.8em; font-style:normal; opacity:.9; margin-left:4px; }
 
@@ -1104,4 +1123,3 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
   .rt-time{ font-size:18px; }
   .rt-dist{ font-size:16px; }
 }
-

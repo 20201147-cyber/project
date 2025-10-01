@@ -1,6 +1,6 @@
 // DrivePanel.js
 import React, { useState, useEffect } from "react";
-
+import "../../css/DrivePanel.css";
 // 거리 계산 함수 (Haversine 공식)
 const calculateDistance = (lat1, lng1, lat2, lng2) => {
     const R = 6371; // 지구 반경 (km)
@@ -19,11 +19,79 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
     const [nearbyParking, setNearbyParking] = useState([]);
     const [originalDestination, setOriginalDestination] = useState(routeInfo?.destination ?? null);
 
-    // routeInfo 존재 시 남은 거리/시간 표시
-    const remainingDistance = routeInfo?.distance ?? "-";
-    const remainingTime = routeInfo?.time ?? "-";
+    const [showModal, setShowModal] = useState(false);
+    const [selectedPark, setSelectedPark] = useState(null);
+
     const destinationName = routeInfo?.destination ?? "미설정";
     const fmtHM = (s) => (s && s.length === 4) ? `${s.slice(0,2)}:${s.slice(2)}` : "-";
+
+    // ✅ 경로탐색 함수 (기존 코드 그대로 옮김)
+    const handleRouteSearch = async (park) => {
+        if (!map) return;
+        const parkLat = parseFloat(park.LAT);
+        const parkLng = parseFloat(park.LOT);
+
+        const startX = coordinates.lng;
+        const startY = coordinates.lat;
+        const endX = parkLng;
+        const endY = parkLat;
+
+        try {
+            const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
+                },
+                body: JSON.stringify({
+                    startX,
+                    startY,
+                    endX,
+                    endY,
+                    reqCoordType: "WGS84GEO",
+                    resCoordType: "WGS84GEO"
+                })
+            });
+
+            const data = await res.json();
+            if (!data.features || !data.features.length) return;
+
+            let pathPoints = [];
+            let totalTime = "-";
+            let totalDistance = "-";
+
+            data.features.forEach((feature) => {
+                const props = feature.properties;
+                if (props.totalTime) {
+                    totalTime = props.totalTime;
+                    totalDistance = props.totalDistance;
+                }
+                if (feature.geometry?.type === "LineString") {
+                    feature.geometry.coordinates.forEach(([lon, lat]) => {
+                        pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
+                    });
+                }
+            });
+
+            if (window.currentRouteLine) window.currentRouteLine.setMap(null);
+
+            const polyline = new window.kakao.maps.Polyline({
+                path: pathPoints,
+                strokeWeight: 5,
+                strokeColor: "#3897f0",
+                strokeOpacity: 1,
+                strokeStyle: "solid"
+            });
+            polyline.setMap(map);
+            window.currentRouteLine = polyline;
+
+            const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
+            const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
+            setRouteInfo({ distance: distKm, time: timeMin, destination: park.PKLT_NM });
+        } catch (err) {
+            console.error("경로 탐색 실패:", err);
+        }
+    };
 
     const getStatus = (park) => {
         const total = Number(park.TPKCT) || 0;
@@ -130,7 +198,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             const currentCenter = map.getCenter();
             const lat = currentCenter.getLat();
             const lng = currentCenter.getLng();
-            const moveDistance = 0.0001;
+            const moveDistance = 0.00005;
 
             switch (event.key) {
                 case "w": map.panTo(new window.kakao.maps.LatLng(lat + moveDistance, lng)); break;
@@ -191,72 +259,9 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                                     <h4 className="ep-drive-title">{park.PKLT_NM ?? "이름없는 주차장"}</h4>
                                     <button
                                         className="ep-drive-route-btn"
-                                        onClick={async () => {
-                                            if (!map) return;
-                                            const parkLat = parseFloat(park.LAT);
-                                            const parkLng = parseFloat(park.LOT);
-
-                                            const startX = coordinates.lng;
-                                            const startY = coordinates.lat;
-                                            const endX = parkLng;
-                                            const endY = parkLat;
-
-                                            try {
-                                                const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
-                                                    method: "POST",
-                                                    headers: {
-                                                        "Content-Type": "application/json",
-                                                        "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
-                                                    },
-                                                    body: JSON.stringify({
-                                                        startX,
-                                                        startY,
-                                                        endX,
-                                                        endY,
-                                                        reqCoordType: "WGS84GEO",
-                                                        resCoordType: "WGS84GEO"
-                                                    })
-                                                });
-
-                                                const data = await res.json();
-                                                if (!data.features || !data.features.length) return;
-
-                                                let pathPoints = [];
-                                                let totalTime = "-";
-                                                let totalDistance = "-";
-
-                                                data.features.forEach((feature) => {
-                                                    const props = feature.properties;
-                                                    if (props.totalTime) {
-                                                        totalTime = props.totalTime;
-                                                        totalDistance = props.totalDistance;
-                                                    }
-
-                                                    if (feature.geometry?.type === "LineString") {
-                                                        feature.geometry.coordinates.forEach(([lon, lat]) => {
-                                                            pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
-                                                        });
-                                                    }
-                                                });
-
-                                                if (window.currentRouteLine) window.currentRouteLine.setMap(null);
-
-                                                const polyline = new window.kakao.maps.Polyline({
-                                                    path: pathPoints,
-                                                    strokeWeight: 5,
-                                                    strokeColor: "#3897f0",
-                                                    strokeOpacity: 1,
-                                                    strokeStyle: "solid"
-                                                });
-                                                polyline.setMap(map);
-                                                window.currentRouteLine = polyline;
-
-                                                const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
-                                                const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
-                                                setRouteInfo({ distance: distKm, time: timeMin, destination: park.PKLT_NM });
-                                            } catch (err) {
-                                                console.error("경로 탐색 실패:", err);
-                                            }
+                                        onClick={() => {
+                                            setSelectedPark(park);   // ✅ 선택한 주차장 저장
+                                            setShowModal(true);       // ✅ 모달 띄우기
                                         }}
                                     >
                                         경로탐색
@@ -295,44 +300,39 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                     })
                     : go ? <div>주차장 탐색중...</div> : null}
             </div>
-
-            {/* 하단 모달 */}
-            {routeInfo?.destination && (
-                <div style={{
-                    position: "fixed",
-                    bottom: 20,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "rgba(0,0,0,0.8)",
-                    color: "#fff",
-                    padding: "10px 20px",
-                    borderRadius: "8px",
-                    fontSize: 14,
-                    zIndex: 999,
-                    display: "flex",
-                    gap: 12,
-                    alignItems: "center"
-                }}>
-                    <span style={{ fontWeight: "bold" }}>{routeInfo.destination}</span>까지 &nbsp;
-                    거리: {remainingDistance} km / 예상 시간: {remainingTime} 분
-
-                    {/* 원래 목적지 버튼 */}
-                    {originalDestination && routeInfo.destination !== originalDestination && (
-                        <button
-                            style={{
-                                padding: "2px 8px",
-                                fontSize: 12,
-                                borderRadius: 4,
-                                border: "none",
-                                cursor: "pointer",
-                                background: "#fff",
-                                color: "#000"
-                            }}
-                            onClick={handleReturnToOriginal}
-                        >
-                            원래 목적지로
-                        </button>
-                    )}
+            {/* ✅ 모달 */}
+            {/* DrivePanel.js 모달 부분 */}
+            {showModal && selectedPark && (
+                <div
+                    className="modal3-overlay"
+                    onClick={() => setShowModal(false)} // 배경 클릭 시 닫힘
+                >
+                    <div
+                        className="modal3 modal3--compact" 
+                        onClick={(e) => e.stopPropagation()} // 박스 클릭 시 닫히지 않게
+                    >
+                        <h3>경로 안내</h3>
+                        <p>
+                            <b>{selectedPark.PKLT_NM}</b> 으로 안내하시겠습니까?
+                        </p>
+                        <div className="modal3-actions">
+                            <button
+                                className="yes-btn"
+                                onClick={() => {
+                                    handleRouteSearch(selectedPark);
+                                    setShowModal(false);
+                                }}
+                            >
+                                예
+                            </button>
+                            <button
+                                className="no-btn"
+                                onClick={() => setShowModal(false)}
+                            >
+                                아니요
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

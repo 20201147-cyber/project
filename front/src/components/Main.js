@@ -1,5 +1,4 @@
 // Main.js
-
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../css/Main.css";
@@ -26,7 +25,18 @@ function clearRouteLine() {
     window.currentRouteLine = null;
   }
 }
-
+// 거리 계산 함수 (미터 단위)
+function calcDistanceMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000; // 지구 반경 (m)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a =
+      Math.sin(dLat/2) ** 2 +
+      Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+      Math.sin(dLng/2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
 // 굵기와 컬러만 바꿔서 3중 라인으로 예쁘게 렌더
 function clearRoutePath() {
   ["routeGlowLine", "routeShadowLine", "currentRouteLine"].forEach(k => {
@@ -82,8 +92,29 @@ export default function Main() {
   // 도착지명/ETA/예상 여석(가능하면)
   const destName = routeInfo?.destination || null;
   const timeMin = routeInfo?.time ?? routeInfo?.timeMin;
-  const eta = calcETA(timeMin);
 
+  const [showArriveModal, setShowArriveModal] = useState(false);
+
+// 안내 중일 때 위치 업데이트마다 목적지와 거리 체크
+  useEffect(() => {
+    if (!go || !routeInfo.destination || !map || !parkingList.length) return;
+
+    const destPark = parkingList.find(p => p.PKLT_NM === routeInfo.destination);
+    if (!destPark) return;
+
+    const dist = calcDistanceMeters(
+        coordinates.lat,
+        coordinates.lng,
+        parseFloat(destPark.LAT),
+        parseFloat(destPark.LOT)
+    );
+
+    if (dist <= 50) { // 100m 이내
+      setShowArriveModal(true);
+      setGO(false);
+      clearRoutePath();
+    }
+  }, [coordinates, go, routeInfo.destination, parkingList, map]);
   // 지도 중심을 기준으로 재탐색
 const onRerouteClick = async () => {
   if (!map || !routeInfo?.destination) return;
@@ -111,6 +142,88 @@ const onRerouteClick = async () => {
     }
     setMode("destination"); // 목적지 변경 화면으로
   };
+  useEffect(() => {
+    if (!map || !routeInfo.destination || !parkingList.length) return;
+
+    const updateRoute = async () => {
+      const startX = coordinates.lng;
+      const startY = coordinates.lat;
+
+      const endPark = parkingList.find(p => p.PKLT_NM === routeInfo.destination);
+      if (!endPark) return;
+
+      const endX = parseFloat(endPark.LOT);
+      const endY = parseFloat(endPark.LAT);
+
+      try {
+        const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
+          },
+          body: JSON.stringify({
+            startX, startY, endX, endY,
+            reqCoordType: "WGS84GEO",
+            resCoordType: "WGS84GEO"
+          })
+        });
+
+        const data = await res.json();
+        if (!data.features || !data.features.length) return;
+
+        let pathPoints = [];
+        let totalTime = "-";
+        let totalDistance = "-";
+
+        data.features.forEach((feature) => {
+          const props = feature.properties;
+          if (props.totalTime) {
+            totalTime = props.totalTime;
+            totalDistance = props.totalDistance;
+          }
+
+          if (feature.geometry?.type === "LineString") {
+            feature.geometry.coordinates.forEach(([lon, lat]) => {
+              pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
+            });
+          }
+        });
+
+        // 기존 폴리라인 제거
+        if (window.currentRouteLine) window.currentRouteLine.setMap(null);
+
+        const polyline = new window.kakao.maps.Polyline({
+          path: pathPoints,
+          strokeWeight: 5,
+          strokeColor: "#3897f0",
+          strokeOpacity: 1,
+          strokeStyle: "solid"
+        });
+
+        polyline.setMap(map);
+        window.currentRouteLine = polyline;
+
+        const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
+        const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
+
+        setRouteInfo(prev => ({
+          ...prev,
+          distance: distKm,
+          time: timeMin
+        }));
+
+      } catch (err) {
+        console.error("경로 업데이트 실패:", err);
+      }
+    };
+
+    updateRoute();
+  }, [coordinates, routeInfo.destination, map, parkingList]);
+    //전역함수 설정
+  useEffect(() => {
+    window.onRerouteClick = onRerouteClick;
+  }, [onRerouteClick]);
   // ✅ 주행 탭으로 들어가면, #map 안의 예전 하단 바만 깔끔히 숨김
   useEffect(() => {
     if (mode !== "drive") return;
@@ -312,14 +425,14 @@ const onRerouteClick = async () => {
       // 현재 위치 마커
       const marker = new window.kakao.maps.Marker({
         position: new window.kakao.maps.LatLng(
-          coordinates.lat,
-          coordinates.lng
+            coordinates.lat,
+            coordinates.lng
         ),
         map: mapInstance,
         title: "현재 위치",
         image: new window.kakao.maps.MarkerImage(
-          "/images/car.png",
-          new window.kakao.maps.Size(50, 50)
+            "/images/car.png",
+            new window.kakao.maps.Size(50, 50)
         ),
       });
 
@@ -454,7 +567,7 @@ const onRerouteClick = async () => {
             </div>
             <div class="ep-overlay__actions">
               <button class="ep-overlay__btn" id="detail-zone">상세분석</button>&nbsp
-              <a href="#" class="ep-overlay__btn" id="route-search">경로탐색</a>
+              <a href="#" class="ep-overlay__btn" id="route-search" onClick={onRerouteClick}>경로탐색</a>
             </div>
           </div>`;
       };
@@ -688,91 +801,137 @@ const onRerouteClick = async () => {
             </button>
           </div>
         </div>
-
-        
-
+        {/*주행 안내판*/}
         <div className="panel-wrap">
-            {/* 목적지 모드: 경로가 없을 때만 기존 패널 노출 */}
-            {mode === "destination" && !routeInfo?.destination && (
+          {/* 목적지 모드: 경로가 없을 때만 기존 패널 노출 */}
+          {mode === "destination" && !routeInfo?.destination && (
               <DestinationPanel
-                map={map}
-                coordinates={coordinates}
-                ParkingList={parkingList}
-                routeInfo={routeInfo}
-                setRouteInfo={setRouteInfo}
-                go={go}
-                setGO={setGO}
-                setMode={setMode}
+                  map={map}
+                  coordinates={coordinates}
+                  ParkingList={parkingList}
+                  routeInfo={routeInfo}
+                  setRouteInfo={setRouteInfo}
+                  go={go}
+                  setGO={setGO}
+                  setMode={setMode}
               />
-            )}
+          )}
 
-            {/* 드라이브/즐겨찾기 그대로 */}
-            {mode === "drive" && (
+          {/* 드라이브/즐겨찾기 그대로 */}
+          {mode === "drive" && (
               <DrivePanel
-                map={map}
-                go={go}
-                setGO={setGO}
-                coordinates={coordinates}
-                ParkingList={parkingList}
-                routeInfo={routeInfo}
-                setRouteInfo={setRouteInfo}
-                hideLegacyBottom
+                  map={map}
+                  go={go}
+                  setGO={setGO}
+                  coordinates={coordinates}
+                  ParkingList={parkingList}
+                  routeInfo={routeInfo}
+                  setRouteInfo={setRouteInfo}
+                  hideLegacyBottom
               />
-            )}
-            {mode === "favorites" && <FavoritesPanel />}
+          )}
+          {mode === "favorites" && <FavoritesPanel />}
 
-            {/* ✅ 경로가 생기면 카드만 노출 */}
-            {mode === "destination" && routeInfo?.destination && (
-              <div className="route-card mt-12">
-                <div className="route-title-row">
-                  <div className="route-title">{routeInfo.destination}</div>
+          {/* ✅ 경로가 생기면 카드만 노출 (중복 제거) */}
+          {mode === "destination" && routeInfo?.destination && (() => {
+            const getStatus = (park) => {
+              const total = Number(park.TPKCT) || 0;
+              const remain = park.remainCnt;
+              if (remain == null || total === 0) return { label: "정보 없음", variant: "gray", pct: 0 };
+              const r = remain / total;
+              if (r >= 0.5) return { label: "여유", variant: "green", pct: Math.round(r*100) };
+              if (r >= 0.2) return { label: "보통", variant: "amber", pct: Math.round(r*100) };
+              return { label: "혼잡", variant: "red", pct: Math.round(r*100) };
+            };
+            const park = parkingList.find(p => p.PKLT_NM === routeInfo.destination) || {};
+            const distanceStr = routeInfo.distance ?? routeInfo.distanceKm ?? "-";
+            const timeMin = routeInfo.time ?? routeInfo.timeMin ?? "-";
+            const eta = (() => {
+              const m = Number(timeMin);
+              if (!m || Number.isNaN(m)) return "-";
+              const d = new Date(Date.now() + m * 60000);
+              return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+            })();
+            const expectedRemain = park?.remainCnt ?? "-";
+            const chargeClass = park?.CHGD_FREE_NM ? "blue" : "gray";
+            const status = getStatus(park); // 필요시 계산
 
-                  <button className="btn-edit" onClick={onEditRoute} aria-label="경로 수정">
-                    <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 20h9" />
-                      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-                    </svg>
-                  </button>
+            const fmtHM = s => s && s.length === 4 ? `${s.slice(0,2)}:${s.slice(2)}` : s || "-";
+            //발표때 한번만
+            const totalSpots = 1317;
+            const parkedCars = 1235;
+            const remaining = totalSpots - parkedCars;
+
+            const fillPct = Math.round((remaining / totalSpots) * 100);
+
+            return (
+                <div className="route-card mt-12">
+                  <div className="route-title-row">
+                    <div className="route-title">{routeInfo.destination}</div>
+                    <button className="btn-edit" onClick={onEditRoute} aria-label="경로 수정">
+                      <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 20h9"/>
+                        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="ep-drive-badges">
+                    <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
+                    <span className={`badge ${status.variant}`}>{status.label}</span>
+                    {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
+                  </div>
+
+                  <div className="ep-drive-stats">
+                    <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
+                    <div className="ep-stat"><span>소요시간</span><b>{timeMin} 분</b></div>
+                    <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
+                  </div>
+                  <hr/>
+
+                  <div style={{display:"flex"}}>
+                    <div className="ep-stat" ><b><span style={{fontSize:"14px",color:"black"}}><div>현재</div><div>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div></span></b></div>
+                    <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
+                    <div className="ep-stat"><span>주차된 차량</span><b>{park.liveCnt ?? "-"}</b></div>
+                    <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
+                  </div>
+                  <div className={`ep-meter ${status.variant}`}>
+                    <div className="fill" style={{ width: `${status.pct}%` }} />
+                    <div className="cap">{status.label}</div>
+                  </div>
+
+                  <div style={{ display: "flex" }}>
+                    <div className="ep-stat">
+                      <b><span style={{fontSize:"14px",color:"black"}}>도착시<div>{eta}</div></span></b>
+                    </div>
+                    <div className="ep-stat">
+                      <span>총자리</span><b>1317</b>
+                    </div>
+                    <div className="ep-stat">
+                      <span>주차된 차량</span><b>1235</b>
+                    </div>
+                    <div className="ep-stat">
+                      <span>도착시 여석</span><b>82</b>
+                    </div>
+                  </div>
+
+                  <div className={`ep-meter ${status.variant}`}>
+                    <div className="fill" style={{ width: `${fillPct}%`, backgroundColor: "red" }} />
+                    <div className="cap">{fillPct}%</div>
+                  </div>
+                  <div className="route-actions">
+                    <button className="btn btn-reserve" onClick={()=>alert("예약 준비중")}>예약하기</button>
+                    <button className="btn btn-start" onClick={()=>{ setGO(true); setMode("drive"); }}>안내 시작</button>
+                    <button className="btn btn-close" onClick={()=>{
+                      setRouteInfo({}); setGO(false);
+                      if (window.currentRouteLine){ window.currentRouteLine.setMap(null); window.currentRouteLine=null; }
+                    }}>닫기</button>
+                  </div>
                 </div>
-
-                <div className="route-kpis">
-                  <div className="kpi" data-ico="dist">
-                    <span>거리</span>
-                    <b>{(routeInfo?.distance ?? routeInfo?.distanceKm ?? "-")} km</b>
-                  </div>
-                  <div className="kpi" data-ico="time">
-                    <span>소요시간</span>
-                    <b>{(routeInfo?.time ?? routeInfo?.timeMin ?? "-")} 분</b>
-                  </div>
-                  <div className="kpi" data-ico="eta">
-                    <span>도착시간</span>
-                    <b>{
-                      (()=>{ const m=Number(routeInfo?.time ?? routeInfo?.timeMin);
-                        if(!m||Number.isNaN(m)) return "-";
-                        const d=new Date(Date.now()+m*60000);
-                        return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;})()
-                    }</b>
-                  </div>
-                  <div className="kpi" data-ico="slots">
-                    <span>도착시 예상 여석</span>
-                    <b>{
-                      (()=>{ const p=parkingList.find(v=>v.PKLT_NM===routeInfo?.destination);
-                        return p?.remainCnt ?? "-"; })()
-                    }</b>
-                  </div>
-                </div>
-
-                <div className="route-actions">
-                  <button className="btn btn-reserve" onClick={()=>alert("예약 준비중")}>예약하기</button>
-                  <button className="btn btn-start" onClick={()=>{ setGO(true); setMode("drive"); }}>안내 시작</button>
-                  <button className="btn btn-close" onClick={()=>{
-                    setRouteInfo({}); setGO(false);
-                    if (window.currentRouteLine){ window.currentRouteLine.setMap(null); window.currentRouteLine=null; }
-                  }}>닫기</button>
-                </div>
-              </div>
-            )}
+            );
+          })()}
         </div>
+
 
         <div className="footer">@Eazypark</div>
       </aside>
@@ -782,7 +941,6 @@ const onRerouteClick = async () => {
           <Link className="link-btn" to="/admin">관리자</Link>
           <Link className="link-btn" to="/login">로그인</Link>
           <Link className="link-btn" to="/mobile">모바일 버전</Link>
-          <Link className="link-btn" to="/tmap">티맵</Link>
         </div>
 
         <div
@@ -856,6 +1014,69 @@ const onRerouteClick = async () => {
           </div>
         )}
       </div>
+      {showArriveModal && (
+          <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 1000,
+              }}
+              onClick={() => setShowArriveModal(false)}
+          >
+            <div
+                style={{
+                  background: "#fff",
+                  padding: "20px 25px",
+                  borderRadius: "12px",
+                  width: "280px",
+                  textAlign: "center",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                  animation: "fadeIn 0.2s ease-out",
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ marginBottom: "10px", fontSize: "18px", fontWeight: "bold" }}>
+                목적지에 도착했습니다!
+              </h3>
+              <p style={{ marginBottom: "15px", fontSize: "14px", color: "#555" }}>
+                안내를 종료합니다.
+              </p>
+              <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                <button
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      border: "none",
+                      backgroundColor: "#3897f0",
+                      color: "#fff",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                    }}
+                >
+                  안내 계속
+                </button>
+                <button
+                    style={{
+                      flex: 1,
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      border: "1px solid #ccc",
+                      backgroundColor: "#f9f9f9",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setShowArriveModal(false)}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+      )}
     </div>
   );
 }
