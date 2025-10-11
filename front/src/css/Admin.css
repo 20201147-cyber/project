@@ -1,0 +1,61 @@
+.admin-page {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 수직 Navbar */
+.vertical-navbar {
+    background-color: #f8f9fa;
+    height: calc(100vh - 56px); /* 상단 수평 Navbar 높이 제외 */
+    border-right: 1px solid #dee2e6;
+}
+
+.vertical-navbar .nav-link {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.vertical-navbar .nav-link:hover {
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+/* 메인 콘텐츠 */
+.main-content h2 {
+    color: #343a40;
+}
+
+/* 카드 스타일 */
+.admin-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+.admin-card:hover {
+    transform: translateY(-3px);
+}
+
+/* 통계 카드 */
+.stats-card {
+    margin-top: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+.custom-navbar {
+    background-color: #fff !important; /* 흰색 배경 */
+    border-bottom: 1px solid #dee2e6; /* 회색 수평선 */
+}
+
+.custom-navbar .navbar-brand,
+.custom-navbar .nav-link {
+    color: #000 !important; /* 글씨 검정 */
+}
+
+.custom-navbar .nav-link:hover {
+    color: #555 !important;
+}
+
+
+

@@ -3,10 +3,64 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
 import "../css/Login.css";
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const Login = () => {
     const [show, setShow] = useState(false);
+    const [signupData, setSignupData] = useState({ id: "", password: "", username: "" });
+    const [loginData, setLoginData] = useState({ id: "", password: "" });
+    const navigate = useNavigate();
+    const handleChange = (e) => {
+        setSignupData({ ...signupData, [e.target.name]: e.target.value });
+    };
+    const handleSignup = async () => {
+        if (!signupData.id) {
+            alert("아이디를 입력하세요");
+            return;
+        }
+        if (!/^[a-zA-Z0-9]{4,20}$/.test(signupData.id)) {
+            alert("아이디는 영문+숫자 4~20자만 가능합니다");
+            return;
+        }
+        if (!signupData.password) {
+            alert("비밀번호를 입력하세요");
+            return;
+        }
+        if (signupData.password.length < 6) {
+            alert("비밀번호는 최소 6자 이상입니다");
+            return;
+        }
+        if (!signupData.username) {
+            alert("이름을 입력하세요");
+            return;
+        }
 
+        try {
+            const res = await axios.post("/api/auth/signup", signupData);
+            alert(res.data); // 성공 메시지
+            setShow(false);  // 모달 닫기
+            setSignupData({ id: "", password: "" }); // 입력 초기화
+        } catch (err) {
+            alert(err.response?.data || "회원가입 실패");
+        }
+    };
+    // 로그인
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        const { id, password } = loginData;
+        if (!id || !password) {
+            alert("아이디와 비밀번호를 입력하세요.");
+            return;
+        }
+        try {
+            const res = await axios.post("/api/auth/login", loginData, { withCredentials: true });
+            alert("로그인 성공!");
+            navigate("/");
+        } catch (err) {
+            alert(err.response?.data || "로그인 실패");
+        }
+    };
     return (
         // 2열 레이아웃 컨테이너
         <div className="login-2col">
@@ -26,9 +80,21 @@ const Login = () => {
                     <Link to="/">메인 페이지로</Link>
                     <h1 className="logo-text">Ezpark</h1>
 
-                    <form>
-                        <fieldset>아이디 <input type="text" /></fieldset>
-                        <fieldset>비밀번호 <input type="password" /></fieldset>
+                    <form onSubmit={handleLogin}>
+                        <Form.Control
+                            type="text"
+                            placeholder="아이디 입력"
+                            name="id"
+                            value={loginData.id}
+                            onChange={(e) => setLoginData({...loginData, [e.target.name]: e.target.value})}
+                        />
+                        <Form.Control
+                            type="password"
+                            placeholder="비밀번호 입력"
+                            name="password"
+                            value={loginData.password}
+                            onChange={(e) => setLoginData({...loginData, [e.target.name]: e.target.value})}
+                        />
                         <button type="submit">로그인</button>
                         <hr />
                         <button type="button" onClick={() => setShow(true)}>회원가입</button>
@@ -51,16 +117,41 @@ const Login = () => {
                     <Form>
                         <Form.Group className="mb-3">
                             <Form.Label>아이디</Form.Label>
-                            <Form.Control type="text" placeholder="아이디 입력" />
+                            <Form.Control
+                                type="text"
+                                placeholder="아이디 입력"
+                                name="id"
+                                value={signupData.id}
+                                onChange={handleChange}
+                            />
                         </Form.Group>
+
                         <Form.Group className="mb-3">
                             <Form.Label>비밀번호</Form.Label>
-                            <Form.Control type="password" placeholder="비밀번호 입력" />
+                            <Form.Control
+                                type="password"
+                                placeholder="비밀번호 입력"
+                                name="password"
+                                value={signupData.password}
+                                onChange={handleChange}
+                            />
                         </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>이름</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="이름 입력"
+                                name="username"
+                                value={signupData.username || ""}  // username도 상태에 추가
+                                onChange={handleChange}
+                            />
+                        </Form.Group>
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer className="login-modal-footer">
-                    <Button variant="primary" onClick={() => setShow(false)}>가입</Button>
+                    <Button variant="primary" onClick={handleSignup}>가입</Button>
                     <Button variant="secondary" onClick={() => setShow(false)}>닫기</Button>
                 </Modal.Footer>
             </Modal>
