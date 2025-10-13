@@ -5,7 +5,6 @@ const Dashboard = () => {
     return (
         <>
             <h2 className="mb-4">대시보드</h2>
-
             <Row className="mb-4">
                 <Col md={4}>
                     <Card className="admin-card">

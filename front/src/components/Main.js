@@ -20,6 +20,37 @@ function calcETA(min) {
   return `${hh}:${mm}`;
 }
 
+// ===== utils (define ONCE, top-level) =====
+const pad2 = (n) => String(n).padStart(2, "0");
+
+// "24:00" 허용
+function toDateFromHHMM(hhmm) {
+  let [h, m] = hhmm.split(":").map(Number);
+  const d = new Date();
+  if (h === 24) { h = 0; d.setDate(d.getDate() + 1); }
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+function addMinutesHHMM(hhmm, minutes) {
+  if (!hhmm || typeof minutes !== "number") return "-";
+  const d = toDateFromHHMM(hhmm);
+  d.setMinutes(d.getMinutes() + minutes);
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+
+// 다음 정각(06~24로 클램핑)
+function roundToNextHourHH() {
+  const d = new Date();
+  let h = d.getMinutes() > 0 ? d.getHours() + 1 : d.getHours();
+  if (h < 6) h = 6;
+  if (h > 24) h = 24;
+  return `${pad2(h)}:00`;
+}
+
+// 06~24 목록
+const HOURS_24 = Array.from({ length: 19 }, (_, i) => i + 6);
+
 // (예약) 5분 단가 기반 가격 계산
 function calcTicketPrice(park, minutes, key) {
   if (key === "DAY") {
@@ -115,6 +146,7 @@ export default function Main() {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [agree, setAgree] = useState(false);
   const [user, setUser] = useState(null);
+  const [startTime,setStartTime] = useState(null);
   const { visibleOnly, setVisibleOnly } = useContext(ParkingContext);
   // 도착지명/ETA/예상 여석(가능하면)
   const destName = routeInfo?.destination || null;
@@ -175,8 +207,29 @@ export default function Main() {
     return (p?.remainCnt ?? "-");
   }, [destName, parkingList]);
 
+  // 정각만 입력되도록 강제(normalize). 13:17 입력해도 13:00으로 교정
+  const handleStartTimeChange = (e) => {
+    const v = e.target.value; // "HH:MM"
+    if (!v) { setStartTime(""); return; }
+    const [h] = v.split(":");
+    const normalized = `${pad2(h)}:00`;
+    setStartTime(normalized);
+  };
+
+  // 선택된 권종 minutes와 startTime으로 종료시간 계산
+  const endTime = React.useMemo(() => {
+    if (!selectedTicket || !startTime) return "-";
+    // 당일권은 무조건 24:00까지
+    if (selectedTicket.key === "DAY") return "24:00";
+    return addMinutesHHMM(startTime, selectedTicket.minutes);
+  }, [selectedTicket, startTime]);
+
   // 버튼 동작
-  const onReserve = () => { setReserveMode(true); };
+  const onReserve = () => {
+    setReserveMode(true);
+    setStartTime(roundToNextHourHH()); // ← 정의돼 있는 함수 사용
+  };
+
   const onStartGuide = () => { setGO(true); setMode("drive"); };
   const onClose = () => { setRouteInfo({}); setGO(false); clearRouteLine(); };
   const onEditRoute = () => {
@@ -964,7 +1017,7 @@ export default function Main() {
                           >
                             <div className="ticket-label">{t.label}</div>
                             <div className="ticket-price">
-                              {price == null ? "요금정보 없음" : `${price.toLocaleString()}원`}
+                              {price == null ? "무료" : `${price.toLocaleString()}원`}
                             </div>
                           </button>
                         );
@@ -973,12 +1026,37 @@ export default function Main() {
 
                     {/* 요약/동의 */}
                     <div className="reserve-summary">
-                      <div><span>도착</span><b>{eta ?? "-"}</b></div>
-                      <div><span>권종</span><b>{selectedTicket ? selectedTicket.label : "-"}</b></div>
-                      <div><span>결제금액</span>
+                    {/* 시작 */}
+                    <div className="summary-item start">
+                      <span>시작</span>
+                      <select className="time-select" value={startTime || ""} onChange={e=>setStartTime(e.target.value)}>
+                        <option value="" disabled>시간 선택</option>
+                        {HOURS_24.map(h => {
+                          const v = `${pad2(h)}:00`;
+                          return <option key={v} value={v}>{v}</option>;
+                        })}
+                      </select>
+                    </div>
+
+                      {/* 선택 권종 */}
+                      <div className="summary-item">
+                        <span>시간</span>
+                        <b>{selectedTicket ? selectedTicket.label : "-"}</b>
+                      </div>
+
+                      {/* 종료(자동 계산) */}
+                      <div className="summary-item">
+                        <span>종료시간</span>
+                        <b>{endTime}</b>
+                      </div>
+
+                      {/* 결제금액 */}
+                      <div className="summary-item">
+                        <span>결제금액</span>
                         <b>{selectedTicket?.price == null ? "-" : `${selectedTicket.price.toLocaleString()}원`}</b>
                       </div>
                     </div>
+
                     <label className="agree-row">
                       <input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} />
                       <span>이용 안내 및 환불정책에 동의합니다</span>
@@ -994,17 +1072,21 @@ export default function Main() {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
+                                parkCode:park.PKLT_CD,
                                 parkName: routeInfo.destination,
                                 ticket: selectedTicket.key,
                                 minutes: selectedTicket.minutes,
                                 price: selectedTicket.price ?? null,
                                 eta,
+                                startTime,
+                                endTime,
                               }),
                             });
                             alert("예약이 완료되었습니다.");
                             setReserveMode(false);
                             setSelectedTicket(null);
                             setAgree(false);
+                            setStartTime("");
                           } catch (e) {
                             console.error(e);
                             alert("예약 처리에 실패했습니다.");
