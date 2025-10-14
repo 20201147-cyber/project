@@ -66,6 +66,7 @@ const ParkingSearch = () => {
                 </table>
             </div>
             {/*초기 디비저장코드 <button onClick={saveDB}>주차장 저장</button>*/}
+            <button onClick={saveDB}>주차장 저장</button>
         </div>
     );
 };

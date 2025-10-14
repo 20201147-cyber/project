@@ -1,14 +1,36 @@
 // src/components/panels/FavoritesPanel.js
 import React, { useEffect, useState } from "react";
+import "../../css/FavoritesPanel.css";
 
 export default function FavoritesPanel() {
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState(null);
   const [list, setList] = useState([]);
 
+  // ✅ 개발용 가짜 로그인 스위치
+  //    1) URL 끝에 ?devLogin 붙이거나
+  //    2) localStorage.setItem('devLogin','1') 해두면 로그인으로 간주
+  const devLogin =
+    new URLSearchParams(window.location.search).has("devLogin") ||
+    localStorage.getItem("devLogin") === "1";
+
+  // ──────────────────────────────────
   // 로그인 상태 확인
+  // ──────────────────────────────────
   useEffect(() => {
     let abort = false;
+
+    // 개발 모드: 즉시 로그인 처리
+    if (devLogin) {
+      if (!abort) {
+        setMe({ username: "dev-user" });
+        setLoading(false);
+      }
+      return () => {
+        abort = true;
+      };
+    }
+
     (async () => {
       try {
         const res = await fetch("/api/auth/me", { credentials: "include" });
@@ -20,14 +42,29 @@ export default function FavoritesPanel() {
         if (!abort) setLoading(false);
       }
     })();
-    return () => { abort = true; };
-  }, []);
 
-  // 로그인 되어있으면 예약 목록 가져오기
+    return () => {
+      abort = true;
+    };
+  }, [devLogin]);
+
+  // ──────────────────────────────────
+  // 예약 목록 가져오기
+  // ──────────────────────────────────
   useEffect(() => {
+    // 개발 모드: 서버 호출 없이 로컬 mock 사용
+    if (devLogin) {
+      const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
+      setList(Array.isArray(stash) ? stash : []);
+      setLoading(false);
+      return;
+    }
+
     if (!me?.username) return;
+
     let abort = false;
     setLoading(true);
+
     (async () => {
       try {
         const res = await fetch("/api/reservations", {
@@ -42,8 +79,11 @@ export default function FavoritesPanel() {
         if (!abort) setLoading(false);
       }
     })();
-    return () => { abort = true; };
-  }, [me?.username]);
+
+    return () => {
+      abort = true;
+    };
+  }, [me?.username, devLogin]);
 
   // 로딩 중
   if (loading) {
@@ -55,8 +95,8 @@ export default function FavoritesPanel() {
     );
   }
 
-  // 비로그인
-  if (!me?.username) {
+  // 비로그인 (개발 모드가 아닐 때만)
+  if (!me?.username && !devLogin) {
     return (
       <div>
         <div className="section-title">예약</div>
@@ -65,7 +105,9 @@ export default function FavoritesPanel() {
           <div style={{ marginTop: 10 }}>
             <button
               className="primary-btn-center"
-              onClick={() => { window.location.href = "/login"; }}
+              onClick={() => {
+                window.location.href = "/login";
+              }}
             >
               로그인 하러 가기
             </button>
@@ -80,7 +122,9 @@ export default function FavoritesPanel() {
     return (
       <div>
         <div className="section-title">예약</div>
-        <div className="tip-box">아직 예약된 내역이 없습니다. 경로 카드에서 예약을 진행해 보세요.</div>
+        <div className="tip-box">
+          아직 예약된 내역이 없습니다. 경로 카드에서 예약을 진행해 보세요.
+        </div>
       </div>
     );
   }
@@ -89,42 +133,48 @@ export default function FavoritesPanel() {
   return (
     <div>
       <div className="section-title">예약</div>
-      <div style={{ display: "grid", gap: 10 }}>
+
+      <div className="res-list">
         {list.map((r) => (
           <article
             key={r.id ?? `${r.parkName}-${r.createdAt ?? Math.random()}`}
-            className="card"
-            style={{ padding: 12 }}
+            className="res-card"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontWeight: 700, fontSize: 15 }}>
-                {r.parkName}
-              </div>
-              <span className="badge blue">
-                {r.ticket === "DAY" ? "당일권" : `${Math.round((r.minutes || 0) / 60)}시간권`}
+            {/* 헤더 */}
+            <div className="res-head">
+              <div className="res-title" title={r.parkName}>{r.parkName}</div>
+              <span className={`res-badge ${r.ticket === "DAY" ? "day" : "hour"}`}>
+                {r.ticket === "DAY"
+                  ? "당일권"
+                  : `${Math.round((r.minutes || 0) / 60)}시간권`}
               </span>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 8 }}>
-              <div>
-                <span className="subtle">도착</span>
-                <div style={{ fontWeight: 700 }}>{r.eta ?? "-"}</div>
+            {/* 본문 */}
+            <div className="res-grid">
+              <div className="res-cell">
+                <div className="res-label">도착</div>
+                <div className="res-value">{r.eta ?? "-"}</div>
               </div>
-              <div>
-                <span className="subtle">시간</span>
-                <div style={{ fontWeight: 700 }}>{r.minutes ? `${Math.round(r.minutes / 60)}시간` : "-"}</div>
+              <div className="res-cell">
+                <div className="res-label">시간</div>
+                <div className="res-value">
+                  {r.minutes ? `${Math.round(r.minutes / 60)}시간` : "-"}
+                </div>
               </div>
-              <div>
-                <span className="subtle">결제금액</span>
-                <div style={{ fontWeight: 700 }}>
+              <div className="res-cell">
+                <div className="res-label">결제금액</div>
+                <div className="res-value res-amount">
                   {r.price != null ? `${Number(r.price).toLocaleString()}원` : "-"}
                 </div>
               </div>
             </div>
 
+            {/* 보조정보 */}
             {r.createdAt && (
-              <div className="subtle" style={{ marginTop: 8 }}>
-                예약일시: {new Date(r.createdAt).toLocaleString()}
+              <div className="res-meta">
+                예약일시&nbsp;
+                <time>{new Date(r.createdAt).toLocaleString()}</time>
               </div>
             )}
           </article>

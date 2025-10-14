@@ -1,4 +1,4 @@
-// Main.js 1008
+// Main.js
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "../css/Main.css";
@@ -54,7 +54,7 @@ const HOURS_24 = Array.from({ length: 19 }, (_, i) => i + 6);
 // (예약) 5분 단가 기반 가격 계산
 function calcTicketPrice(park, minutes, key) {
   if (key === "DAY") {
-    return park?.DAY_PRICE ?? 30000; // 예: 정액 3만원, 필요시 필드/값 조정
+    return park?.DAY_PRICE ?? 50000; // 예: 정액 3만원, 필요시 필드/값 조정
   }
   const unit = Number(park?.PRK_CRG); // 5분당 요금
   if (!unit || Number.isNaN(unit)) return null;
@@ -174,6 +174,42 @@ export default function Main() {
         });
   }, []);
   // 안내 중일 때 위치 업데이트마다 목적지와 거리 체크
+
+  useEffect(() => {
+  const onReservationAction = async (e) => {
+    const { parkName, action } = e.detail || {};
+    if (!parkName || !map || !parkingList?.length) return;
+
+    // 해당 주차장 찾기
+    const park = parkingList.find(p => p.PKLT_NM === parkName);
+   if (!park) return;
+
+    // 지도 이동
+    const lat = parseFloat(park.LAT);
+    const lng = parseFloat(park.LOT);
+    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+      map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+    }
+
+    // 좌측 패널: 경로 카드 열기
+    setMode("destination");
+    setRouteInfo(prev => ({ ...prev, destination: parkName }));
+
+   // 경로 선 생성(현재 지도 중심 → 주차장)
+    const c = map.getCenter();
+    await doRoute(c.getLat(), c.getLng(), parkName);
+
+    // 바로 안내 시작을 원하면
+    if (action === "guide") {
+      setGO(true);
+      setMode("drive");
+    }
+  };
+
+  window.addEventListener("ep:reservation-action", onReservationAction);
+  return () => window.removeEventListener("ep:reservation-action", onReservationAction);
+}, [map, parkingList /*, doRoute, setGO, setMode*/]);
+
   useEffect(() => {
     if (!go || !routeInfo.destination || !map || !parkingList.length) return;
 
@@ -973,8 +1009,14 @@ export default function Main() {
               const totalSpots = 1317;
               const parkedCars = 1235;
               const remaining = totalSpots - parkedCars;
-
               const fillPct = Math.round((remaining / totalSpots) * 100);
+
+              // [REPLACE] 도착시 표기값: 하드코딩값만 사용
+              const arrivalTotal  = totalSpots;
+              const arrivalParked = parkedCars;
+              const arrivalRemain = remaining;
+              const arrivalPct    = Math.round((arrivalRemain / arrivalTotal) * 100);
+              const arrivalLabel  = arrivalPct >= 50 ? "여유" : arrivalPct >= 20 ? "보통" : "혼잡";
 
               return (
               <div className="route-card mt-12">
@@ -1066,23 +1108,41 @@ export default function Main() {
                       <button
                         className="btn btn-start"
                         disabled={!selectedTicket || !agree}
-                        onClick={async ()=>{
+                        onClick={async () => {
                           try {
                             await fetch("/api/reservations", {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
-                                parkCode:park.PKLT_CD,
+                                parkCode: park.PKLT_CD,
                                 parkName: routeInfo.destination,
-                                ticket: selectedTicket.key,
                                 minutes: selectedTicket.minutes,
                                 price: selectedTicket.price ?? null,
                                 eta,
                                 startTime,
                                 endTime,
+                                userId: user?.id,
+                                ticket: selectedTicket.key,
                               }),
                             });
                             alert("예약이 완료되었습니다.");
+
+                            // 개발 모드(?devLogin)일 때는 로컬에도 저장해 '예약 내역'에서 보이게 함
+                            const mock = {
+                              id: Date.now(),
+                              parkName: routeInfo.destination,
+                              minutes: selectedTicket.minutes,
+                              price: selectedTicket.price ?? null,
+                              eta,
+                              startTime,
+                              endTime,
+                              createdAt: new Date().toISOString(),
+                              ticket: selectedTicket.key,
+                            };
+                            const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
+                            stash.unshift(mock);
+                            localStorage.setItem("mockReservations", JSON.stringify(stash));
+
                             setReserveMode(false);
                             setSelectedTicket(null);
                             setAgree(false);
@@ -1090,6 +1150,24 @@ export default function Main() {
                           } catch (e) {
                             console.error(e);
                             alert("예약 처리에 실패했습니다.");
+
+                            // 서버 실패해도 ?devLogin 모드면 로컬 저장
+                            if (new URLSearchParams(window.location.search).has("devLogin")) {
+                              const mock = {
+                                id: Date.now(),
+                                parkName: routeInfo.destination,
+                                minutes: selectedTicket.minutes,
+                                price: selectedTicket.price ?? null,
+                                eta,
+                                startTime,
+                                endTime,
+                                createdAt: new Date().toISOString(),
+                                ticket: selectedTicket.key,
+                              };
+                              const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
+                              stash.unshift(mock);
+                              localStorage.setItem("mockReservations", JSON.stringify(stash));
+                            }
                           }
                         }}
                       >
@@ -1112,35 +1190,49 @@ export default function Main() {
                     </div>
                     <hr/>
 
-                    <div style={{display:"flex"}}>
-                      <div className="ep-stat"><b><span style={{fontSize:"14px",color:"black"}}><div>현재</div><div>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div></span></b></div>
+                    {/* === [REPLACE-BEGIN] 도착시 블록 === */}
+                    <div className="stat-stack">
+                      {/* 헤더 */}
+                      <div className="arrival-head">
+                        <span className="loading-mini" aria-hidden="true"></span>
+                        <span>도착시</span>
+                        <b style={{ marginLeft: 6 }}>{eta}</b>
+                      </div>
+
+                      {/* 3개 카드: 정가운데 정렬 */}
+                      <div className="stats-row arrival-row">
+                        <div className="ep-stat2"><span>총자리</span><b>{arrivalTotal}</b></div>
+                        <div className="ep-stat2"><span>주차된 차량</span><b>{arrivalParked}</b></div>
+                        <div className="ep-stat2"><span>도착시 여석</span><b>{arrivalRemain}</b></div>
+                      </div>
+
+                      {/* 도착시 혼잡도 게이지 (항상 노출) */}
+                      <div className={`ep-meter arrival ${status.variant}`}>
+                        <div className="fill" style={{ width: `${arrivalPct}%` }} />
+                        <div className="cap">{arrivalLabel}</div>
+                      </div>
+                    </div>
+
+                    {/* [2] 현재 블록 */}
+                    <div className="stats-row">
+                      <div className="ep-stat">
+                        <b>
+                          <span style={{ fontSize: "14px", color: "black" }}>
+                            <div>현재</div>
+                            <div>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div>
+                          </span>
+                        </b>
+                      </div>
                       <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
                       <div className="ep-stat"><span>주차된 차량</span><b>{park.liveCnt ?? "-"}</b></div>
                       <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
                     </div>
+                    {/* === [REPLACE-END] === */}
+
+                    {/* 혼잡도 게이지는 그대로 유지 (현재 상태용) */}
                     <div className={`ep-meter ${status.variant}`}>
                       <div className="fill" style={{ width: `${status.pct}%` }} />
                       <div className="cap">{status.label}</div>
-                    </div>
-
-                    <div style={{ display: "flex" }}>
-                      <div className="ep-stat">
-                        <b><span style={{fontSize:"14px",color:"black"}}>도착시<div>{eta}</div></span></b>
-                      </div>
-                      <div className="ep-stat">
-                        <span>총자리</span><b>1317</b>
-                      </div>
-                      <div className="ep-stat">
-                        <span>주차된 차량</span><b>1235</b>
-                      </div>
-                      <div className="ep-stat">
-                        <span>도착시 여석</span><b>82</b>
-                      </div>
-                    </div>
-
-                    <div className={`ep-meter ${status.variant}`}>
-                      <div className="fill" style={{ width: `${fillPct}%`, backgroundColor: "red" }} />
-                      <div className="cap">{fillPct}%</div>
                     </div>
 
                     <div className="route-actions">

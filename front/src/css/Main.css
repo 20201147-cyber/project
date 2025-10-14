@@ -1201,10 +1201,99 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
   top:50%;
   transform:translateY(-50%);
   width:10px; height:6px;
-  background-image:url('data:image/svg+xml;utf8,\
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" fill="none" stroke="%236b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-  background-repeat:no-repeat;
-  background-size:100% 100%;
-  opacity:.7;
-  pointer-events:none;
 }
+
+/* === Arrival row (ep-stat2) - 사이즈/패딩 그대로, 컬러만 통일 === */
+:root{
+  /* 통일 포인트 컬러: 원하시면 한 줄만 바꾸세요 */
+  --arrive-accent: #4f46e5; /* 인디고 */
+}
+
+/* 카드 배경을 아주 옅은 그라데이션으로 통일 */
+.ep-stat2{
+  background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--arrive-accent), #ffffff 94%));
+  border: 1px solid color-mix(in srgb, var(--arrive-accent), #e5e7eb 80%);
+  border-radius: 12px;
+  padding: 8px;               /* 기존과 동일 */
+  text-align: center;         /* 기존과 동일 */
+}
+
+/* 라벨(윗줄) 컬러는 중립 톤으로 통일 */
+.ep-stat2 span{
+  display: block;             /* 기존과 동일 */
+  font-size: 11px;            /* 기존과 동일 */
+  color: #64748b;             /* 살짝 진한 중립 */
+}
+
+/* 값(아랫줄) 컬러는 모두 포인트 컬러로 통일 */
+.ep-stat2 b{
+  display: block;             /* 기존과 동일 */
+  font-size: 15px;            /* 기존과 동일 */
+  font-weight: 800;           /* 기존과 동일 */
+  color: var(--arrive-accent);
+}
+
+/* ETA(첫 칸): inline style로 '도착시' 라벨이 검정이라 숫자(div)만 포인트 컬러 적용 */
+.ep-stat2:first-child b span > div{
+  color: var(--arrive-accent);
+}
+
+/* 아주 미세한 호버 강조(원치 않으면 삭제) */
+.ep-stat2:hover{
+  background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--arrive-accent), #ffffff 90%));
+  border-color: color-mix(in srgb, var(--arrive-accent), #e5e7eb 60%);
+  transition: background .18s cubic-bezier(.16,1,.3,1), border-color .18s cubic-bezier(.16,1,.3,1);
+}
+
+/* === 두 블록(도착시/현재) 쌓기용 래퍼 === */
+.stat-stack{
+  display: flex;
+  flex-direction: column;
+  gap: 18px;            /* ← 두 블록 사이 간격 넉넉히 */
+  margin-top: 10px;
+}
+.stats-row{
+  display: flex;
+  gap: 8px;             /* 한 줄 안 카드들 간격 */
+}
+
+/* 도착시 왼쪽에 붙일 작은 스피너 */
+.loading-mini{
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ccc;
+  border-top: 2px solid var(--ink);  /* 브랜드 파랑 */
+  border-radius: 50%;
+  animation: spin .9s linear infinite; /* 기존 @keyframes spin 사용 */
+  display: inline-block;
+  vertical-align: -2px; /* 글자 기준선 보정 – 깨지지 않게 살짝 내려줌 */
+  margin-right: 6px;    /* 텍스트와 간격 */
+}
+
+/* === [ADD] 도착시 UI 튜닝 시작 === */
+.arrival-head{
+  display:flex; align-items:center;
+  font-weight:700; color:#111;
+}
+.stats-row.arrival-row{ justify-content:center; gap:5px; }
+.ep-stat2{ padding:8px 10px; min-width:84px; border-radius:12px; font-size:13px; }
+.ep-stat2 > span{ opacity:.75; font-size:12px; }
+
+.ep-meter.arrival{
+  height:8px; border-radius:6px; background:#e9f0ff;
+  overflow:hidden; margin:0px 0 4px; position:relative;
+  margin-bottom: 20px;
+}
+.ep-meter.arrival .fill{ height:100%; width:0; transition:width .25s ease; }
+.ep-meter.arrival .green .fill{ background:#22c55e; }
+.ep-meter.arrival .amber .fill{ background:#f59e0b; }
+.ep-meter.arrival .red .fill{ background:#ef4444; }
+.ep-meter.arrival .gray .fill{ background:#9ca3af; }
+.ep-meter.arrival .cap{
+    position:absolute; right:8px; top:-18px;
+    font-size:11px; color:#6b7280;
+}
+
+.loading-mini{ width:14px; height:14px; border:2px solid #ccc; border-top:2px solid var(--ink);
+  border-radius:50%; animation:spin .9s linear infinite; }
+/* === [ADD] 도착시 UI 튜닝 끝 === */

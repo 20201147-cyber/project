@@ -1,0 +1,67 @@
+.reservation-container {
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+}
+
+.title {
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.park-info {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    background-color: #f7f9fc;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #dce1e8;
+}
+
+.no-reservation {
+    color: #888;
+    font-style: italic;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.reservation-table {
+    width: 50%;
+    border-collapse: collapse;
+}
+
+.reservation-table th,
+.reservation-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+.reservation-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.time-cell {
+    background-color: #fafafa;
+    font-weight: bold;
+}
+
+.reserved {
+    background-color: #90ee90; /* 연두색 */
+}
+
+.empty {
+    background-color: #fff;
+}
+.table-container {
+    max-height: 500px; /* 테이블 높이 제한 */
+    overflow-y: auto;   /* 세로 스크롤 */
+    overflow-x: auto;   /* 가로 스크롤 */
+    border: 1px solid #dce1e8;
+    border-radius: 8px;
+    padding: 5px;
+}
