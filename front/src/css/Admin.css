@@ -7,6 +7,7 @@
     background-color: #f8f9fa;
     height: calc(100vh - 56px); /* 상단 수평 Navbar 높이 제외 */
     border-right: 1px solid #dee2e6;
+    width: 220px;
 }
 
 .vertical-navbar .nav-link {

@@ -28,6 +28,10 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
     // ✅ 경로탐색 함수 (기존 코드 그대로 옮김)
     const handleRouteSearch = async (park) => {
         if (!map) return;
+        if (window.__routeLocked && window.currentRouteLine) {
+        setRouteInfo(prev => ({ ...prev, destination: park.PKLT_NM })); // 정보만 변경
+        return; // 라인은 그대로
+    }
         const parkLat = parseFloat(park.LAT);
         const parkLng = parseFloat(park.LOT);
 
@@ -115,6 +119,10 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
     // 원래 목적지로 돌아가기
     const handleReturnToOriginal = async () => {
         if (!map || !originalDestination) return;
+        if (window.__routeLocked && window.currentRouteLine) {
+            setRouteInfo(prev => ({ ...prev, destination: originalDestination })); // 정보만 변경
+            return; // 라인 그대로
+        }
         const destPark = ParkingList.find(p => p.PKLT_NM === originalDestination);
         if (!destPark) return;
 

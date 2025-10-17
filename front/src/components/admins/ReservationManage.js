@@ -1,45 +1,37 @@
-import React, {useContext, useEffect, useState} from "react";
-import {ParkingContext} from "../../context/ParkingContext";
-import "../../css/ReservationManage.css"
+import React, { useContext, useEffect, useState } from "react";
+import { ParkingContext } from "../../context/ParkingContext";
+import "../../css/ReservationManage.css";
+
 const ReservationManage = () => {
     const [reservations, setReservations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [user, setUser] = useState(null);
-    const { visibleOnly, setVisibleOnly } = useContext(ParkingContext);
+    const { visibleOnly } = useContext(ParkingContext);
 
     // 로그인한 관리자 정보 가져오기
     useEffect(() => {
         fetch("/api/auth/me", { credentials: "include" })
             .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                setUser(data);
-                console.log("로그인 유저 정보:", data);
-                console.log(visibleOnly);
-            })
-            .catch(() => {
-                setUser(null);
-                console.log("유저 정보 가져오기 실패");
-            });
+            .then(data => setUser(data))
+            .catch(() => setUser(null));
     }, []);
 
     // 서버에서 예약 데이터 가져오기
     useEffect(() => {
         fetch("/api/findReserve", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
         })
-            .then((res) => {
+            .then(res => {
                 if (!res.ok) throw new Error("서버 응답 오류");
                 return res.json();
             })
-            .then((data) => {
+            .then(data => {
                 setReservations(data);
                 setLoading(false);
             })
-            .catch((err) => {
+            .catch(err => {
                 setError(err.message);
                 setLoading(false);
             });
@@ -49,11 +41,8 @@ const ReservationManage = () => {
     if (error) return <p>오류 발생: {error}</p>;
     if (!user) return <p>로그인이 필요합니다.</p>;
 
-    // 로그인한 관리자의 주차장 코드
     const adminParkCode = user.parkCode;
-    console.log(reservations)
-    console.log(adminParkCode)
-    console.log(visibleOnly)
+
     // 해당 주차장 예약만 필터링
     const filteredReservations = reservations.filter(r => r.parkCode === adminParkCode);
 
@@ -65,7 +54,6 @@ const ReservationManage = () => {
 
     const myPark = visibleOnly.find(park => String(park.PKLT_CD) === String(adminParkCode));
 
-    console.log("내 주차장"+myPark);
     return (
         <div className="reservation-container">
             <h2 className="title">예약 관리</h2>
@@ -82,21 +70,21 @@ const ReservationManage = () => {
             {filteredReservations.length === 0 ? (
                 <p className="no-reservation">예약 내역이 없습니다.</p>
             ) : (
-                <div className="table-container">
+                <div className="table-container" style={{ overflowX: "auto" }}>
                     <table className="reservation-table">
                         <thead>
                         <tr>
-                            <th>시간</th>
-                            {userIds.map(uid => (
-                                <th key={uid}>{uid}</th>
+                            <th>사용자 ID</th>
+                            {hours.map(hour => (
+                                <th key={hour}>{hour}:00</th>
                             ))}
                         </tr>
                         </thead>
                         <tbody>
-                        {hours.map(hour => (
-                            <tr key={hour}>
-                                <td className="time-cell">{hour}:00</td>
-                                {userIds.map(uid => {
+                        {userIds.map(uid => (
+                            <tr key={uid}>
+                                <td className="user-cell">{uid}</td>
+                                {hours.map(hour => {
                                     const hasReservation = filteredReservations.some(r => {
                                         const startH = parseInt(r.startTime.split(":")[0]);
                                         const endH = parseInt(r.endTime.split(":")[0]);
@@ -104,11 +92,12 @@ const ReservationManage = () => {
                                     });
                                     return (
                                         <td
-                                            key={uid}
+                                            key={hour}
                                             className={hasReservation ? "reserved" : "empty"}
                                             style={{
-                                                backgroundColor: hasReservation ? "#4da6ff" : "#fff", // 여기만 변경
-                                                textAlign: "center"
+                                                backgroundColor: hasReservation ? "#4da6ff" : "#fff",
+                                                textAlign: "center",
+                                                minWidth: "40px"
                                             }}
                                         ></td>
                                     );

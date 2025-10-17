@@ -862,47 +862,47 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 /* === Route summary card (좌측 패널용) === */
 .route-card{
-  background:#fff;
-  border:1px solid #eef0f4;
-  border-radius:14px;
-  padding:14px;
-  box-shadow:0 8px 18px rgba(0,0,0,.06);
+    background:#fff;
+    border:1px solid #eef0f4;
+    border-radius:14px;
+    padding:14px;
+    box-shadow:0 8px 18px rgba(0,0,0,.06);
 }
 
 .route-title{
-  font-weight:800;
-  font-size:16px;
-  color:#111827;
-  letter-spacing:-.2px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  margin-bottom:8px;
+    font-weight:800;
+    font-size:16px;
+    color:#111827;
+    letter-spacing:-.2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    margin-bottom:8px;
 }
 
 .route-kpis{
-  display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:8px;
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:8px;
 }
 
 .kpi{
-  position:relative;
-  border:1px solid #eef0f4;
-  background:#f9fafb;
-  border-radius:12px;
-  padding:10px 10px 8px;
+    position:relative;
+    border:1px solid #eef0f4;
+    background:#f9fafb;
+    border-radius:12px;
+    padding:10px 10px 8px;
 }
 
 .kpi span{
-  display:block;
-  font-size:11px;
-  color:#6b7280;
-  margin-bottom:2px;
+    display:block;
+    font-size:11px;
+    color:#6b7280;
+    margin-bottom:2px;
 }
 .kpi b{
-  display:block;
-  font-size:15px;
-  font-weight:800;
-  color:#111827;
+    display:block;
+    font-size:15px;
+    font-weight:800;
+    color:#111827;
 }
 
 /* 아이콘 느낌(옵션): data-ico에 따라 앞에 이모지 붙이기 */
@@ -913,204 +913,204 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 /* 버튼 줄 */
 .route-actions{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
+    display:flex;
+    gap:8px;
+    margin-top:12px;
 }
 .route-actions .btn{
-  flex:1;
-  height:44px;
-  border-radius:12px;
-  font-weight:800;
-  font-size:14px;
-  cursor:pointer;
-  transition: all .16s cubic-bezier(.16,1,.3,1);
+    flex:1;
+    height:44px;
+    border-radius:12px;
+    font-weight:800;
+    font-size:14px;
+    cursor:pointer;
+    transition: all .16s cubic-bezier(.16,1,.3,1);
 }
 
 /* 예약(세컨더리), 안내 시작(프라이머리), 닫기(고스트) */
 .btn-reserve{
-  background:#eef6ff;
-  color:#2563eb;
-  border:1px solid #d9e8ff;
+    background:#eef6ff;
+    color:#2563eb;
+    border:1px solid #d9e8ff;
 }
 .btn-reserve:hover{ filter:brightness(1.03); transform:translateY(-1px); }
 
 .btn-start{
-  background: var(--ink);
-  color:#fff;
-  border:1px solid var(--ink);
-  box-shadow:0 8px 18px rgba(56,151,240,.25);
+    background: var(--ink);
+    color:#fff;
+    border:1px solid var(--ink);
+    box-shadow:0 8px 18px rgba(56,151,240,.25);
 }
 .btn-start:hover{ filter:brightness(1.03); transform:translateY(-1px); }
 
 .btn-close{
-  color: #6b7280;
-  border-color: #e6e8ec;
-  background: #f9fafb;
+    color: #6b7280;
+    border-color: #e6e8ec;
+    background: #f9fafb;
 }
 .btn-close:hover{ background:#eef0f3; transform:translateY(-1px); }
 
 /* 좁은 화면에서 한 줄에 못 들어가면 2줄로 */
 @media (max-width: 420px){
-  .route-kpis{ grid-template-columns:1fr; }
+    .route-kpis{ grid-template-columns:1fr; }
 }
 
 /* === Route-card header & edit button === */
 .route-title-row{
-  display:flex; align-items:center; gap:8px;
-  margin-bottom:10px;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:10px;
 }
 .route-title-row .route-title{ margin:0; } /* 기존 여백 제거 */
 
 .btn-edit{
-  margin-left:auto;
-  display:inline-flex; align-items:center; gap:6px;
-  height:32px; padding:0 12px;
-  border-radius:10px;
-  background:#f8fafc;
-  color:#374151;
-  border:1px solid var(--line);
-  font-weight:800; font-size:13px;
-  box-shadow:0 1px 2px rgba(0,0,0,.04);
-  transition: all .16s cubic-bezier(.16,1,.3,1);
-  cursor:pointer;
+    margin-left:auto;
+    display:inline-flex; align-items:center; gap:6px;
+    height:32px; padding:0 12px;
+    border-radius:10px;
+    background:#f8fafc;
+    color:#374151;
+    border:1px solid var(--line);
+    font-weight:800; font-size:13px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition: all .16s cubic-bezier(.16,1,.3,1);
+    cursor:pointer;
 }
 .btn-edit:hover{
-  background:#eef2f7;
-  transform:translateY(-1px);
+    background:#eef2f7;
+    transform:translateY(-1px);
 }
 .btn-edit:active{ transform:none; }
 .btn-edit:focus-visible{
-  outline:none;
-  box-shadow:0 0 0 3px color-mix(in srgb, var(--ink), transparent 70%), 0 0 0 1px var(--ink) inset;
+    outline:none;
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--ink), transparent 70%), 0 0 0 1px var(--ink) inset;
 }
 .btn-edit .ico{
-  width:16px; height:16px; display:inline-block;
+    width:16px; height:16px; display:inline-block;
 }
 
 /* ===== Route bottom toast ===== */
 .route-toast-wrap{
-  position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
-  z-index: 25; pointer-events: none; /* 맵 제스처 유지 */
+    position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    z-index: 25; pointer-events: none; /* 맵 제스처 유지 */
 }
 /* === Route Toast (canonical) === */
 .route-toast {
-  /* 크기: 내용에 맞추되 화면 넘지 않기 */
-  width: fit-content;
-  max-width: min(92vw, 720px);
-  /* 여백/그리드 */
-  padding: 8px 10px;
-  gap: 10px;
+    /* 크기: 내용에 맞추되 화면 넘지 않기 */
+    width: fit-content;
+    max-width: min(92vw, 720px);
+    /* 여백/그리드 */
+    padding: 8px 10px;
+    gap: 10px;
 
-  /* 기존 스타일 유지 */
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  background: rgba(17,24,39,.95);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 14px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.28);
-  backdrop-filter: blur(8px);
+    /* 기존 스타일 유지 */
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    background: rgba(17,24,39,.95);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.28);
+    backdrop-filter: blur(8px);
 }
 
 .rt-left{ display:flex; flex-direction:column; gap:6px; }
 .rt-dest{
-  font-weight:800; font-size:15px; line-height:1.2; letter-spacing:-.2px;
-  max-width:min(68vw, 560px);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-weight:800; font-size:15px; line-height:1.2; letter-spacing:-.2px;
+    max-width:min(68vw, 560px);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .rt-small{ opacity:.8; font-weight:600; margin-left:2px; }
 .rt-badges{ display:flex; flex-wrap:wrap; gap:8px; }
 .rt-chip{
-  display:inline-flex; align-items:center; gap:6px;
-  height:26px; padding:0 8px;
-  border-radius:9999px;
-  background: rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.18);
-  font-weight:800; font-size:12px; color:#fff;
+    display:inline-flex; align-items:center; gap:6px;
+    height:26px; padding:0 8px;
+    border-radius:9999px;
+    background: rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18);
+    font-weight:800; font-size:12px; color:#fff;
 }
 .rt-close{
-  width:30px; height:30px; border-radius:8px;
-  border:1px solid rgba(255,255,255,.2);
-  background: rgba(255,255,255,.06); color:#fff;
-  font-weight:900; font-size:18px; line-height:1;
-  cursor:pointer; transition: all .16s cubic-bezier(.16,1,.3,1);
+    width:30px; height:30px; border-radius:8px;
+    border:1px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.06); color:#fff;
+    font-weight:900; font-size:18px; line-height:1;
+    cursor:pointer; transition: all .16s cubic-bezier(.16,1,.3,1);
 }
 .rt-close:hover{ transform:translateY(-1px); background:rgba(255,255,255,.12); }
 @media (max-width: 720px){
-  .rt-chip{ height:28px; padding:0 9px; font-size:12px; }
+    .rt-chip{ height:28px; padding:0 9px; font-size:12px; }
 }
 
 /* 주행 탭에서 기존 하단 고정 UI(구 바) 전부 숨김, 우리의 토스트만 허용 */
 .mode-drive .map-area > *:not(.map-canvas):not(.header-links):not(.route-toast-wrap):not(.filter-overlay){
-  display: none !important;
+    display: none !important;
 }
 
 /* 혹시 전역에 떠 있는 레거시 바가 있으면 강제 숨김 (자주 쓰는 클래스명들 커버) */
 .mode-drive :is(.rb-wrap, .rb-bar, .drive-bottom, .legacy-bottom, .route-bar){
-  display: none !important;
+    display: none !important;
 }
 
 .route-toast-wrap{ z-index: 1100; }
 
 /* ==== Compact Route Toast (상단바 느낌) ==== */
 .route-toast-wrap{
-  position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
-  z-index:1100; pointer-events:none;
+    position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    z-index:1100; pointer-events:none;
 }
 .route-toast{
-  pointer-events:auto;
-  display:flex; align-items:center; gap:10px;
-  background: rgba(17,24,39,.95);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:14px;
-  padding:10px 12px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.28);
-  backdrop-filter: blur(8px);
+    pointer-events:auto;
+    display:flex; align-items:center; gap:10px;
+    background: rgba(17,24,39,.95);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    padding:10px 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.28);
+    backdrop-filter: blur(8px);
 }
 .route-toast--compact{
-  gap:12px;
+    gap:12px;
 }
 .rt-ico{
-  width: 28px; height: 28px; border-radius: 8px;
-  display:grid; place-items:center;
-  border:1px solid rgba(255,255,255,.2);
-  background: rgba(255,255,255,.06);
-  transition: transform .16s cubic-bezier(.16,1,.3,1), background-color .16s;
-  cursor:pointer; color:#fff;
+    width: 28px; height: 28px; border-radius: 8px;
+    display:grid; place-items:center;
+    border:1px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.06);
+    transition: transform .16s cubic-bezier(.16,1,.3,1), background-color .16s;
+    cursor:pointer; color:#fff;
 }
 .rt-ico:hover{ transform:translateY(-1px); background: rgba(255,255,255,.12); }
 .rt-ico svg{ width:16px; height:16px; }
 
 .rt-center {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1 1 auto;
-  align-items: center;
-  text-align: center;
-  /* 핵심 */
-  min-width: unset !important;
-  max-width: 56vw;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 auto;
+    align-items: center;
+    text-align: center;
+    /* 핵심 */
+    min-width: unset !important;
+    max-width: 56vw;
 }
 
 .rt-line1{
-  font-weight:800; font-size:13px; line-height:1.2; letter-spacing:-.2px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  opacity:.95;
+    font-weight:800; font-size:13px; line-height:1.2; letter-spacing:-.2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    opacity:.95;
 }
 .rt-pin{ margin-right:6px; opacity:.8; font-weight:900; }
 .rt-small{ opacity:.85; font-weight:600; margin-left:2px; }
 
 .rt-line2{ display:flex; align-items:baseline; gap:10px; }
 .rt-time{
-  font-size:18px; font-weight:900; letter-spacing:.2px; line-height:1;
+    font-size:18px; font-weight:900; letter-spacing:.2px; line-height:1;
 }
 .rt-gap{ width:10px; height:1px; opacity:0; } /* 간격 확보용 */
 .rt-dist{
-  font-size:16px; font-weight:800; line-height:1;
+    font-size:16px; font-weight:800; line-height:1;
 }
 .rt-dist em{ font-size:.8em; font-style:normal; opacity:.9; margin-left:4px; }
 
@@ -1119,9 +1119,9 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 /* 작은 화면 대응 */
 @media (max-width: 720px){
-  .rt-center{ min-width: min(82vw, 480px); }
-  .rt-time{ font-size:18px; }
-  .rt-dist{ font-size:16px; }
+    .rt-center{ min-width: min(82vw, 480px); }
+    .rt-time{ font-size:18px; }
+    .rt-dist{ font-size:16px; }
 }
 .ticket-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
 .ticket{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;background:#fff;cursor:pointer}
@@ -1136,13 +1136,13 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 /* ==== 예약 요약 (2행 그리드) ==== */
 .reserve-summary{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
     "start duration"
     "end   price";
-  gap:8px;
-  margin:12px 0;
+    gap:8px;
+    margin:12px 0;
 }
 .summary-item.start    { grid-area: start; }
 .summary-item.duration { grid-area: duration; }
@@ -1151,138 +1151,138 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 /* ===== 예약 요약 카드 가운데 정렬 ===== */
 .summary-item{
-  align-items: center;   /* 내부 요소 수평 중앙 */
-  text-align: center;    /* 라벨/값 텍스트 중앙 */
+    align-items: center;   /* 내부 요소 수평 중앙 */
+    text-align: center;    /* 라벨/값 텍스트 중앙 */
 }
 
 .summary-item span{
-  display: block;
-  width: 100%;
-  text-align: center;
+    display: block;
+    width: 100%;
+    text-align: center;
 }
 
 .summary-item b{
-  display: block;
-  width: 100%;
-  text-align: center;
+    display: block;
+    width: 100%;
+    text-align: center;
 }
 
 /* 시작 시간 셀렉트도 중앙 정렬 유지 */
 /* 기존 .time-select 규칙은 지우고, 아래로 통일 */
 .summary-item.start .time-select{
-  width: auto;           /* 텍스트 너비만큼 */
-  min-width: 88px;       /* 너무 좁아지지 않게 */
-  margin: 0 auto;        /* 가로 가운데 정렬 */
-  padding: 0 24px;       /* 양옆 균형 (우측 화살표 자리 포함) */
-  text-align: center;
-  text-align-last: center;
+    width: auto;           /* 텍스트 너비만큼 */
+    min-width: 88px;       /* 너무 좁아지지 않게 */
+    margin: 0 auto;        /* 가로 가운데 정렬 */
+    padding: 0 24px;       /* 양옆 균형 (우측 화살표 자리 포함) */
+    text-align: center;
+    text-align-last: center;
 
-  /* 폰트/색상 — 다른 값(b)과 통일 */
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--ink);         /* 파란색 */
+    /* 폰트/색상 — 다른 값(b)과 통일 */
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);         /* 파란색 */
 
-  /* 중앙정렬 */
-  text-align: center;
-  text-align-last: center;   /* 크롬/엣지/파폭 */
-  padding: 0 28px 0 8px;     /* 우측 화살표 자리 */
-  line-height: 1.2;
-  cursor: pointer;
+    /* 중앙정렬 */
+    text-align: center;
+    text-align-last: center;   /* 크롬/엣지/파폭 */
+    padding: 0 28px 0 8px;     /* 우측 화살표 자리 */
+    line-height: 1.2;
+    cursor: pointer;
 }
 /* 구형 Edge/IE 화살표 제거 */
 .summary-item.start .time-select::-ms-expand{ display:none; }
 
 /* 커스텀 드롭다운 화살표 */
 .summary-item.start::after{
-  content:"";
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  width:10px; height:6px;
+    content:"";
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    width:10px; height:6px;
 }
 
 /* === Arrival row (ep-stat2) - 사이즈/패딩 그대로, 컬러만 통일 === */
 :root{
-  /* 통일 포인트 컬러: 원하시면 한 줄만 바꾸세요 */
-  --arrive-accent: #4f46e5; /* 인디고 */
+    /* 통일 포인트 컬러: 원하시면 한 줄만 바꾸세요 */
+    --arrive-accent: #4f46e5; /* 인디고 */
 }
 
 /* 카드 배경을 아주 옅은 그라데이션으로 통일 */
 .ep-stat2{
-  background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--arrive-accent), #ffffff 94%));
-  border: 1px solid color-mix(in srgb, var(--arrive-accent), #e5e7eb 80%);
-  border-radius: 12px;
-  padding: 8px;               /* 기존과 동일 */
-  text-align: center;         /* 기존과 동일 */
+    background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--arrive-accent), #ffffff 94%));
+    border: 1px solid color-mix(in srgb, var(--arrive-accent), #e5e7eb 80%);
+    border-radius: 12px;
+    padding: 8px;               /* 기존과 동일 */
+    text-align: center;         /* 기존과 동일 */
 }
 
 /* 라벨(윗줄) 컬러는 중립 톤으로 통일 */
 .ep-stat2 span{
-  display: block;             /* 기존과 동일 */
-  font-size: 11px;            /* 기존과 동일 */
-  color: #64748b;             /* 살짝 진한 중립 */
+    display: block;             /* 기존과 동일 */
+    font-size: 11px;            /* 기존과 동일 */
+    color: #64748b;             /* 살짝 진한 중립 */
 }
 
 /* 값(아랫줄) 컬러는 모두 포인트 컬러로 통일 */
 .ep-stat2 b{
-  display: block;             /* 기존과 동일 */
-  font-size: 15px;            /* 기존과 동일 */
-  font-weight: 800;           /* 기존과 동일 */
-  color: var(--arrive-accent);
+    display: block;             /* 기존과 동일 */
+    font-size: 15px;            /* 기존과 동일 */
+    font-weight: 800;           /* 기존과 동일 */
+    color: var(--arrive-accent);
 }
 
 /* ETA(첫 칸): inline style로 '도착시' 라벨이 검정이라 숫자(div)만 포인트 컬러 적용 */
 .ep-stat2:first-child b span > div{
-  color: var(--arrive-accent);
+    color: var(--arrive-accent);
 }
 
 /* 아주 미세한 호버 강조(원치 않으면 삭제) */
 .ep-stat2:hover{
-  background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--arrive-accent), #ffffff 90%));
-  border-color: color-mix(in srgb, var(--arrive-accent), #e5e7eb 60%);
-  transition: background .18s cubic-bezier(.16,1,.3,1), border-color .18s cubic-bezier(.16,1,.3,1);
+    background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--arrive-accent), #ffffff 90%));
+    border-color: color-mix(in srgb, var(--arrive-accent), #e5e7eb 60%);
+    transition: background .18s cubic-bezier(.16,1,.3,1), border-color .18s cubic-bezier(.16,1,.3,1);
 }
 
 /* === 두 블록(도착시/현재) 쌓기용 래퍼 === */
 .stat-stack{
-  display: flex;
-  flex-direction: column;
-  gap: 18px;            /* ← 두 블록 사이 간격 넉넉히 */
-  margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;            /* ← 두 블록 사이 간격 넉넉히 */
+    margin-top: 10px;
 }
 .stats-row{
-  display: flex;
-  gap: 8px;             /* 한 줄 안 카드들 간격 */
+    display: flex;
+    gap: 8px;             /* 한 줄 안 카드들 간격 */
 }
 
 /* 도착시 왼쪽에 붙일 작은 스피너 */
 .loading-mini{
-  width: 14px;
-  height: 14px;
-  border: 2px solid #ccc;
-  border-top: 2px solid var(--ink);  /* 브랜드 파랑 */
-  border-radius: 50%;
-  animation: spin .9s linear infinite; /* 기존 @keyframes spin 사용 */
-  display: inline-block;
-  vertical-align: -2px; /* 글자 기준선 보정 – 깨지지 않게 살짝 내려줌 */
-  margin-right: 6px;    /* 텍스트와 간격 */
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-top: 2px solid var(--ink);  /* 브랜드 파랑 */
+    border-radius: 50%;
+    animation: spin .9s linear infinite; /* 기존 @keyframes spin 사용 */
+    display: inline-block;
+    vertical-align: -2px; /* 글자 기준선 보정 – 깨지지 않게 살짝 내려줌 */
+    margin-right: 6px;    /* 텍스트와 간격 */
 }
 
 /* === [ADD] 도착시 UI 튜닝 시작 === */
 .arrival-head{
-  display:flex; align-items:center;
-  font-weight:700; color:#111;
+    display:flex; align-items:center;
+    font-weight:700; color:#111;
 }
 .stats-row.arrival-row{ justify-content:center; gap:5px; }
 .ep-stat2{ padding:8px 10px; min-width:84px; border-radius:12px; font-size:13px; }
 .ep-stat2 > span{ opacity:.75; font-size:12px; }
 
 .ep-meter.arrival{
-  height:8px; border-radius:6px; background:#e9f0ff;
-  overflow:hidden; margin:0px 0 4px; position:relative;
-  margin-bottom: 20px;
+    height:8px; border-radius:6px; background:#e9f0ff;
+    overflow:hidden; margin:0px 0 4px; position:relative;
+    margin-bottom: 20px;
 }
 .ep-meter.arrival .fill{ height:100%; width:0; transition:width .25s ease; }
 .ep-meter.arrival .green .fill{ background:#22c55e; }
@@ -1295,5 +1295,5 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 }
 
 .loading-mini{ width:14px; height:14px; border:2px solid #ccc; border-top:2px solid var(--ink);
-  border-radius:50%; animation:spin .9s linear infinite; }
+    border-radius:50%; animation:spin .9s linear infinite; }
 /* === [ADD] 도착시 UI 튜닝 끝 === */

@@ -71,44 +71,56 @@ const TICKETS = [
   { key: "DAY", label: "당일권", minutes: 720 }, // 필요시 변경
 ];
 
-// 경로 라인 제거
+// ===== Route-line utils (top-level, outside component) =====
+
+// 경로 라인 제거 (락 고려)
 function clearRouteLine() {
+  if (window.__routeLocked && window.currentRouteLine) return;
   if (window.currentRouteLine) {
     window.currentRouteLine.setMap(null);
     window.currentRouteLine = null;
   }
 }
+
 // 거리 계산 함수 (미터 단위)
 function calcDistanceMeters(lat1, lng1, lat2, lng2) {
-  const R = 6371000; // 지구 반경 (m)
+  const R = 6371000;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
   const a =
-      Math.sin(dLat/2) ** 2 +
-      Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-      Math.sin(dLng/2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
-// 굵기와 컬러만 바꿔서 3중 라인으로 예쁘게 렌더
+
+// 모든 경로 라인 제거 (락 고려)
 function clearRoutePath() {
-  ["routeGlowLine", "routeShadowLine", "currentRouteLine"].forEach(k => {
-    if (window[k]) { window[k].setMap(null); window[k] = null; }
+  if (window.__routeLocked && window.currentRouteLine) return;
+  ["routeGlowLine", "routeShadowLine", "currentRouteLine"].forEach((k) => {
+    if (window[k]) {
+      window[k].setMap(null);
+      window[k] = null;
+    }
   });
 }
 
+// 3중 라인 그리기 (락 고려)
 function drawRoutePath(map, pathPoints, color = "#3897f0") {
-  // 바깥 부드러운 광(글로우)
+  if (window.__routeLocked && window.currentRouteLine) return;
+
+  // 바깥 글로우
   window.routeGlowLine = new window.kakao.maps.Polyline({
     path: pathPoints,
     strokeWeight: 14,
-    strokeColor: color,          // 같은 컬러
-    strokeOpacity: 0.12,         // 투명
+    strokeColor: color,
+    strokeOpacity: 0.12,
     strokeStyle: "solid",
   });
   window.routeGlowLine.setMap(map);
 
-  // 흰색 외곽선(가독성 ↑)
+  // 흰색 외곽선
   window.routeShadowLine = new window.kakao.maps.Polyline({
     path: pathPoints,
     strokeWeight: 10,
@@ -118,7 +130,7 @@ function drawRoutePath(map, pathPoints, color = "#3897f0") {
   });
   window.routeShadowLine.setMap(map);
 
-  // 본선(브랜드 컬러)
+  // 본선
   window.currentRouteLine = new window.kakao.maps.Polyline({
     path: pathPoints,
     strokeWeight: 6,
@@ -132,6 +144,9 @@ function drawRoutePath(map, pathPoints, color = "#3897f0") {
 export default function Main() {
   const [mode, setMode] = useState("destination"); // destination | drive | favorites
   const [map, setMap] = useState(null);
+  
+  // 🚫 경로 잠금: 주행 시작 후 폴리라인이 절대 바뀌지 않도록 하는 플래그
+  const routeLockedRef = useRef(false);
   const [coordinates, setCoordinates] = useState({
     lat: 37.5662952,
     lng: 126.9779451,
@@ -142,6 +157,8 @@ export default function Main() {
   const [csvDataByName, setCsvDataByName] = useState({});
   const [modalParkName, setModalParkName] = useState(null);
   const [routeInfo, setRouteInfo] = useState({});
+  const [maneuvers, setManeuvers] = useState([]);   // 회전 지점 목록
+  const [nextTurn, setNextTurn]   = useState(null); // { turnType, distM }
   const [reserveMode, setReserveMode] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [agree, setAgree] = useState(false);
@@ -159,7 +176,70 @@ export default function Main() {
         .then(() => {setUser(null);
           alert("로그아웃 성공!")})
         .catch(err => console.error(err));
+
   };
+
+  // ===== Turn-by-turn utils =====
+  const TURN_MAP = {
+    11: { label: "좌회전", icon: "↰" },
+    12: { label: "우회전", icon: "↱" },
+    13: { label: "유턴",   icon: "⤴" },
+    14: { label: "직진",   icon: "↑"  },
+    // 필요하면 추가 (Tmap turnType 값 사용)
+  };
+
+  function formatMeters(m) {
+    if (m == null) return "-";
+    if (m < 1000) return `${Math.round(m)} m`;
+    return `${(m / 1000).toFixed(1)} km`;
+  }
+
+  // 간단 배너 UI (map 우상단 고정)
+  function TurnBanner({ turn, dist }) {
+    if (!turn) return null;
+    const t = TURN_MAP[turn] || { label: "안내", icon: "•" };
+    return (
+      <div style={{
+        position: "fixed", top: 12, right: 12, zIndex: 1100,
+        background: "#111", color: "#fff", padding: "10px 12px",
+        borderRadius: 12, boxShadow: "0 6px 18px rgba(0,0,0,.25)",
+        display: "flex", alignItems: "center", gap: 8, fontWeight: 700
+      }}>
+        <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span style={{ fontSize: 13, opacity: .8 }}>앞으로</span>
+          <span>{formatMeters(dist)} {t.label}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Tmap GeoJSON에서 회전 지점 추출 (turnType 있는 feature들을 Point로 간주)
+  function extractManeuvers(data) {
+    if (!data?.features?.length) return [];
+    const list = [];
+    data.features.forEach((f) => {
+      const p = f.properties || {};
+      const g = f.geometry || {};
+      // 일부 응답은 LineString 세그먼트에도 turnType이 들어오기도 함 -> 좌표의 첫 점을 지점으로 취급
+      if (p.turnType != null) {
+        if (g.type === "Point" && Array.isArray(g.coordinates)) {
+          const [lon, lat] = g.coordinates;
+          list.push({ lat, lon, turnType: p.turnType });
+        } else if (g.type === "LineString" && Array.isArray(g.coordinates) && g.coordinates.length) {
+          const [lon, lat] = g.coordinates[0];
+          list.push({ lat, lon, turnType: p.turnType });
+        }
+      }
+    });
+    return list;
+  }
+
+   useEffect(() => {
+    if (go && window.currentRouteLine) window.__routeLocked = true; // 고정
+    if (!go) window.__routeLocked = false;                          // 해제
+  }, [go]);
+
   //로그인정보 가져옴
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include" })
@@ -176,39 +256,39 @@ export default function Main() {
   // 안내 중일 때 위치 업데이트마다 목적지와 거리 체크
 
   useEffect(() => {
-  const onReservationAction = async (e) => {
-    const { parkName, action } = e.detail || {};
-    if (!parkName || !map || !parkingList?.length) return;
+    const onReservationAction = async (e) => {
+      const { parkName, action } = e.detail || {};
+      if (!parkName || !map || !parkingList?.length) return;
 
-    // 해당 주차장 찾기
-    const park = parkingList.find(p => p.PKLT_NM === parkName);
-   if (!park) return;
+      // 해당 주차장 찾기
+      const park = parkingList.find(p => p.PKLT_NM === parkName);
+      if (!park) return;
 
-    // 지도 이동
-    const lat = parseFloat(park.LAT);
-    const lng = parseFloat(park.LOT);
-    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-      map.setCenter(new window.kakao.maps.LatLng(lat, lng));
-    }
+      // 지도 이동
+      const lat = parseFloat(park.LAT);
+      const lng = parseFloat(park.LOT);
+      if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+        map.setCenter(new window.kakao.maps.LatLng(lat, lng));
+      }
 
-    // 좌측 패널: 경로 카드 열기
-    setMode("destination");
-    setRouteInfo(prev => ({ ...prev, destination: parkName }));
+      // 좌측 패널: 경로 카드 열기
+      setMode("destination");
+      setRouteInfo(prev => ({ ...prev, destination: parkName }));
 
-   // 경로 선 생성(현재 지도 중심 → 주차장)
-    const c = map.getCenter();
-    await doRoute(c.getLat(), c.getLng(), parkName);
+      // 경로 선 생성(현재 지도 중심 → 주차장)
+      const c = map.getCenter();
+      await doRoute(c.getLat(), c.getLng(), parkName);
 
-    // 바로 안내 시작을 원하면
-    if (action === "guide") {
-      setGO(true);
-      setMode("drive");
-    }
-  };
+      // 바로 안내 시작을 원하면
+      if (action === "guide") {
+        setGO(true);
+        setMode("drive");
+      }
+    };
 
-  window.addEventListener("ep:reservation-action", onReservationAction);
-  return () => window.removeEventListener("ep:reservation-action", onReservationAction);
-}, [map, parkingList /*, doRoute, setGO, setMode*/]);
+    window.addEventListener("ep:reservation-action", onReservationAction);
+    return () => window.removeEventListener("ep:reservation-action", onReservationAction);
+  }, [map, parkingList /*, doRoute, setGO, setMode*/]);
 
   useEffect(() => {
     if (!go || !routeInfo.destination || !map || !parkingList.length) return;
@@ -229,6 +309,25 @@ export default function Main() {
       clearRoutePath();
     }
   }, [coordinates, go, routeInfo.destination, parkingList, map]);
+
+  useEffect(() => {
+   if (!go || !maneuvers?.length) { setNextTurn(null); return; }
+
+   const { lat: curLat, lng: curLng } = coordinates;
+   let best = null;     // 30km 이내에서 가장 가까운 지점
+   let nearest = null;  // 범위 밖이면 전체 중 최단 지점 fallback
+
+   for (const m of maneuvers) {
+     const d = calcDistanceMeters(curLat, curLng, m.lat, m.lon);
+     if (!nearest || d < nearest.distM) nearest = { turnType: m.turnType, distM: d };
+     if (d <= 30000) { // 30km 허들
+       if (!best || d < best.distM) best = { turnType: m.turnType, distM: d };
+     }
+   }
+
+   setNextTurn(best || nearest);
+  }, [coordinates, go, maneuvers]);
+
   // 지도 중심을 기준으로 재탐색
   const onRerouteClick = async () => {
     if (!map || !routeInfo?.destination) return;
@@ -306,6 +405,7 @@ export default function Main() {
 
         const data = await res.json();
         if (!data.features || !data.features.length) return;
+        setManeuvers(extractManeuvers(data));
 
         let pathPoints = [];
         let totalTime = "-";
@@ -503,6 +603,7 @@ export default function Main() {
 
     const { pathPoints, totalTime, totalDistance } =
         parseTmapGeojsonToPolyline(data);
+        setManeuvers(extractManeuvers(data));
 
     // 기존 경로 제거
     clearRoutePath();
@@ -1007,7 +1108,7 @@ export default function Main() {
               const fmtHM = s => s && s.length === 4 ? `${s.slice(0,2)}:${s.slice(2)}` : s || "-";
               //발표때 한번만
               const totalSpots = 1317;
-              const parkedCars = 1235;
+              const parkedCars = 480;
               const remaining = totalSpots - parkedCars;
               const fillPct = Math.round((remaining / totalSpots) * 100);
 
@@ -1019,240 +1120,240 @@ export default function Main() {
               const arrivalLabel  = arrivalPct >= 50 ? "여유" : arrivalPct >= 20 ? "보통" : "혼잡";
 
               return (
-              <div className="route-card mt-12">
-                <div className="route-title-row">
-                  <div className="route-title">{routeInfo.destination}</div>
-                  <button className="btn-edit" onClick={onEditRoute} aria-label="경로 수정">
-                    <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 20h9"/>
-                      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="ep-drive-badges">
-                  <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
-                  <span className={`badge ${status.variant}`}>{status.label}</span>
-                  {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
-                </div>
-
-                {reserveMode ? (
-                  <>
-                    <div className="ep-drive-stats">
-                      <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
-                      <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
-                      <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
+                  <div className="route-card mt-12">
+                    <div className="route-title-row">
+                      <div className="route-title">{routeInfo.destination}</div>
+                      <button className="btn-edit" onClick={onEditRoute} aria-label="경로 수정">
+                        <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 20h9"/>
+                          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                        </svg>
+                      </button>
                     </div>
-                    <hr/>
 
-                    {/* 권종 선택 */}
-                    <div className="section-title" style={{marginTop:8}}>권종 선택</div>
-                    <div className="ticket-grid">
-                      {TICKETS.map(t => {
-                        const price = calcTicketPrice(park, t.minutes, t.key);
-                        const active = selectedTicket?.key === t.key;
-                        return (
-                          <button
-                            key={t.key}
-                            className={`ticket ${active ? "active" : ""}`}
-                            onClick={() => setSelectedTicket({ ...t, price })}
-                          >
-                            <div className="ticket-label">{t.label}</div>
-                            <div className="ticket-price">
-                              {price == null ? "무료" : `${price.toLocaleString()}원`}
+                    <div className="ep-drive-badges">
+                      <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
+                      <span className={`badge ${status.variant}`}>{status.label}</span>
+                      {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
+                    </div>
+
+                    {reserveMode ? (
+                        <>
+                          <div className="ep-drive-stats">
+                            <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
+                            <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
+                            <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
+                          </div>
+                          <hr/>
+
+                          {/* 권종 선택 */}
+                          <div className="section-title" style={{marginTop:8}}>권종 선택</div>
+                          <div className="ticket-grid">
+                            {TICKETS.map(t => {
+                              const price = calcTicketPrice(park, t.minutes, t.key);
+                              const active = selectedTicket?.key === t.key;
+                              return (
+                                  <button
+                                      key={t.key}
+                                      className={`ticket ${active ? "active" : ""}`}
+                                      onClick={() => setSelectedTicket({ ...t, price })}
+                                  >
+                                    <div className="ticket-label">{t.label}</div>
+                                    <div className="ticket-price">
+                                      {price == null ? "무료" : `${price.toLocaleString()}원`}
+                                    </div>
+                                  </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* 요약/동의 */}
+                          <div className="reserve-summary">
+                            {/* 시작 */}
+                            <div className="summary-item start">
+                              <span>시작</span>
+                              <select className="time-select" value={startTime || ""} onChange={e=>setStartTime(e.target.value)}>
+                                <option value="" disabled>시간 선택</option>
+                                {HOURS_24.map(h => {
+                                  const v = `${pad2(h)}:00`;
+                                  return <option key={v} value={v}>{v}</option>;
+                                })}
+                              </select>
                             </div>
-                          </button>
-                        );
-                      })}
-                    </div>
 
-                    {/* 요약/동의 */}
-                    <div className="reserve-summary">
-                    {/* 시작 */}
-                    <div className="summary-item start">
-                      <span>시작</span>
-                      <select className="time-select" value={startTime || ""} onChange={e=>setStartTime(e.target.value)}>
-                        <option value="" disabled>시간 선택</option>
-                        {HOURS_24.map(h => {
-                          const v = `${pad2(h)}:00`;
-                          return <option key={v} value={v}>{v}</option>;
-                        })}
-                      </select>
-                    </div>
+                            {/* 선택 권종 */}
+                            <div className="summary-item">
+                              <span>시간</span>
+                              <b>{selectedTicket ? selectedTicket.label : "-"}</b>
+                            </div>
 
-                      {/* 선택 권종 */}
-                      <div className="summary-item">
-                        <span>시간</span>
-                        <b>{selectedTicket ? selectedTicket.label : "-"}</b>
-                      </div>
+                            {/* 종료(자동 계산) */}
+                            <div className="summary-item">
+                              <span>종료시간</span>
+                              <b>{endTime}</b>
+                            </div>
 
-                      {/* 종료(자동 계산) */}
-                      <div className="summary-item">
-                        <span>종료시간</span>
-                        <b>{endTime}</b>
-                      </div>
+                            {/* 결제금액 */}
+                            <div className="summary-item">
+                              <span>결제금액</span>
+                              <b>{selectedTicket?.price == null ? "-" : `${selectedTicket.price.toLocaleString()}원`}</b>
+                            </div>
+                          </div>
 
-                      {/* 결제금액 */}
-                      <div className="summary-item">
-                        <span>결제금액</span>
-                        <b>{selectedTicket?.price == null ? "-" : `${selectedTicket.price.toLocaleString()}원`}</b>
-                      </div>
-                    </div>
+                          <label className="agree-row">
+                            <input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} />
+                            <span>이용 안내 및 환불정책에 동의합니다</span>
+                          </label>
 
-                    <label className="agree-row">
-                      <input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} />
-                      <span>이용 안내 및 환불정책에 동의합니다</span>
-                    </label>
+                          <div className="route-actions">
+                            <button
+                                className="btn btn-start"
+                                disabled={!selectedTicket || !agree}
+                                onClick={async () => {
+                                  try {
+                                    await fetch("/api/reservations", {
+                                      method: "POST",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({
+                                        parkCode: park.PKLT_CD,
+                                        parkName: routeInfo.destination,
+                                        minutes: selectedTicket.minutes,
+                                        price: selectedTicket.price ?? null,
+                                        eta,
+                                        startTime,
+                                        endTime,
+                                        userId: user?.id,
+                                        ticket: selectedTicket.key,
+                                      }),
+                                    });
+                                    alert("예약이 완료되었습니다.");
 
-                    <div className="route-actions">
-                      <button
-                        className="btn btn-start"
-                        disabled={!selectedTicket || !agree}
-                        onClick={async () => {
-                          try {
-                            await fetch("/api/reservations", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                parkCode: park.PKLT_CD,
-                                parkName: routeInfo.destination,
-                                minutes: selectedTicket.minutes,
-                                price: selectedTicket.price ?? null,
-                                eta,
-                                startTime,
-                                endTime,
-                                userId: user?.id,
-                                ticket: selectedTicket.key,
-                              }),
-                            });
-                            alert("예약이 완료되었습니다.");
+                                    // 개발 모드(?devLogin)일 때는 로컬에도 저장해 '예약 내역'에서 보이게 함
+                                    const mock = {
+                                      id: Date.now(),
+                                      parkName: routeInfo.destination,
+                                      minutes: selectedTicket.minutes,
+                                      price: selectedTicket.price ?? null,
+                                      eta,
+                                      startTime,
+                                      endTime,
+                                      createdAt: new Date().toISOString(),
+                                      ticket: selectedTicket.key,
+                                    };
+                                    const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
+                                    stash.unshift(mock);
+                                    localStorage.setItem("mockReservations", JSON.stringify(stash));
 
-                            // 개발 모드(?devLogin)일 때는 로컬에도 저장해 '예약 내역'에서 보이게 함
-                            const mock = {
-                              id: Date.now(),
-                              parkName: routeInfo.destination,
-                              minutes: selectedTicket.minutes,
-                              price: selectedTicket.price ?? null,
-                              eta,
-                              startTime,
-                              endTime,
-                              createdAt: new Date().toISOString(),
-                              ticket: selectedTicket.key,
-                            };
-                            const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
-                            stash.unshift(mock);
-                            localStorage.setItem("mockReservations", JSON.stringify(stash));
+                                    setReserveMode(false);
+                                    setSelectedTicket(null);
+                                    setAgree(false);
+                                    setStartTime("");
+                                  } catch (e) {
+                                    console.error(e);
+                                    alert("예약 처리에 실패했습니다.");
 
-                            setReserveMode(false);
-                            setSelectedTicket(null);
-                            setAgree(false);
-                            setStartTime("");
-                          } catch (e) {
-                            console.error(e);
-                            alert("예약 처리에 실패했습니다.");
+                                    // 서버 실패해도 ?devLogin 모드면 로컬 저장
+                                    if (new URLSearchParams(window.location.search).has("devLogin")) {
+                                      const mock = {
+                                        id: Date.now(),
+                                        parkName: routeInfo.destination,
+                                        minutes: selectedTicket.minutes,
+                                        price: selectedTicket.price ?? null,
+                                        eta,
+                                        startTime,
+                                        endTime,
+                                        createdAt: new Date().toISOString(),
+                                        ticket: selectedTicket.key,
+                                      };
+                                      const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
+                                      stash.unshift(mock);
+                                      localStorage.setItem("mockReservations", JSON.stringify(stash));
+                                    }
+                                  }
+                                }}
+                            >
+                              예약 확정
+                            </button>
+                            <button
+                                className="btn btn-close"
+                                onClick={() => { setReserveMode(false); setSelectedTicket(null); setAgree(false); }}
+                            >
+                              취소
+                            </button>
+                          </div>
+                        </>
+                    ) : (
+                        <>
+                          <div className="ep-drive-stats">
+                            <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
+                            <div className="ep-stat"><span>소요시간</span><b>{timeMin} 분</b></div>
+                            <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
+                          </div>
+                          <hr/>
 
-                            // 서버 실패해도 ?devLogin 모드면 로컬 저장
-                            if (new URLSearchParams(window.location.search).has("devLogin")) {
-                              const mock = {
-                                id: Date.now(),
-                                parkName: routeInfo.destination,
-                                minutes: selectedTicket.minutes,
-                                price: selectedTicket.price ?? null,
-                                eta,
-                                startTime,
-                                endTime,
-                                createdAt: new Date().toISOString(),
-                                ticket: selectedTicket.key,
-                              };
-                              const stash = JSON.parse(localStorage.getItem("mockReservations") || "[]");
-                              stash.unshift(mock);
-                              localStorage.setItem("mockReservations", JSON.stringify(stash));
-                            }
-                          }
-                        }}
-                      >
-                        예약 확정
-                      </button>
-                      <button
-                        className="btn btn-close"
-                        onClick={() => { setReserveMode(false); setSelectedTicket(null); setAgree(false); }}
-                      >
-                        취소
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="ep-drive-stats">
-                      <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
-                      <div className="ep-stat"><span>소요시간</span><b>{timeMin} 분</b></div>
-                      <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
-                    </div>
-                    <hr/>
+                          {/* === [REPLACE-BEGIN] 도착시 블록 === */}
+                          <div className="stat-stack">
+                            {/* 헤더 */}
+                            <div className="arrival-head" style={{fontSize:"20px"}}>
+                              <span className="loading-mini" aria-hidden="true"></span>
+                              <span>도착시</span>
+                              <b style={{ marginLeft: 6 }}>{eta}</b>
+                            </div>
 
-                    {/* === [REPLACE-BEGIN] 도착시 블록 === */}
-                    <div className="stat-stack">
-                      {/* 헤더 */}
-                      <div className="arrival-head">
-                        <span className="loading-mini" aria-hidden="true"></span>
-                        <span>도착시</span>
-                        <b style={{ marginLeft: 6 }}>{eta}</b>
-                      </div>
+                            {/* 3개 카드: 정가운데 정렬 */}
+                            <div className="stats-row arrival-row">
+                              <div className="ep-stat2"><span>총자리</span><b>{arrivalTotal}</b></div>
+                              <div className="ep-stat2"><span>주차된 차량</span><b>{arrivalParked}</b></div>
+                              <div className="ep-stat2"><span>도착시 여석</span><b>{arrivalRemain}</b></div>
+                            </div>
 
-                      {/* 3개 카드: 정가운데 정렬 */}
-                      <div className="stats-row arrival-row">
-                        <div className="ep-stat2"><span>총자리</span><b>{arrivalTotal}</b></div>
-                        <div className="ep-stat2"><span>주차된 차량</span><b>{arrivalParked}</b></div>
-                        <div className="ep-stat2"><span>도착시 여석</span><b>{arrivalRemain}</b></div>
-                      </div>
+                            {/* 도착시 혼잡도 게이지 (항상 노출) */}
+                            <div className={`ep-meter arrival ${status.variant}`}>
+                              <div className="fill" style={{ width: `${arrivalPct}%` }} />
+                              <div className="cap">{arrivalLabel}</div>
+                            </div>
+                          </div>
 
-                      {/* 도착시 혼잡도 게이지 (항상 노출) */}
-                      <div className={`ep-meter arrival ${status.variant}`}>
-                        <div className="fill" style={{ width: `${arrivalPct}%` }} />
-                        <div className="cap">{arrivalLabel}</div>
-                      </div>
-                    </div>
-
-                    {/* [2] 현재 블록 */}
-                    <div className="stats-row">
-                      <div className="ep-stat">
-                        <b>
+                          {/* [2] 현재 블록 */}
+                          <div className="stats-row">
+                            <div className="ep-stat">
+                              <b>
                           <span style={{ fontSize: "14px", color: "black" }}>
                             <div>현재</div>
                             <div>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div>
                           </span>
-                        </b>
-                      </div>
-                      <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
-                      <div className="ep-stat"><span>주차된 차량</span><b>{park.liveCnt ?? "-"}</b></div>
-                      <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
-                    </div>
-                    {/* === [REPLACE-END] === */}
+                              </b>
+                            </div>
+                            <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
+                            <div className="ep-stat"><span>주차된 차량</span><b>{park.liveCnt ?? "-"}</b></div>
+                            <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
+                          </div>
+                          {/* === [REPLACE-END] === */}
 
-                    {/* 혼잡도 게이지는 그대로 유지 (현재 상태용) */}
-                    <div className={`ep-meter ${status.variant}`}>
-                      <div className="fill" style={{ width: `${status.pct}%` }} />
-                      <div className="cap">{status.label}</div>
-                    </div>
+                          {/* 혼잡도 게이지는 그대로 유지 (현재 상태용) */}
+                          <div className={`ep-meter ${status.variant}`}>
+                            <div className="fill" style={{ width: `${status.pct}%` }} />
+                            <div className="cap">{status.label}</div>
+                          </div>
 
-                    <div className="route-actions">
-                      <button className="btn btn-reserve" onClick={onReserve}>예약하기</button>
-                      <button className="btn btn-start" onClick={()=>{ setGO(true); setMode("drive"); }}>안내 시작</button>
-                      <button className="btn btn-close" onClick={()=>{
-                        setRouteInfo({}); setGO(false);
-                        if (window.currentRouteLine){ window.currentRouteLine.setMap(null); window.currentRouteLine=null; }
-                      }}>닫기</button>
-                    </div>
-                  </>
-                )}
-              </div>
-            );
+                          <div className="route-actions">
+                            <button className="btn btn-reserve" onClick={onReserve}>예약하기</button>
+                            <button className="btn btn-start" onClick={()=>{ setGO(true); setMode("drive"); }}>안내 시작</button>
+                            <button className="btn btn-close" onClick={()=>{
+                              setRouteInfo({}); setGO(false);
+                              if (window.currentRouteLine){ window.currentRouteLine.setMap(null); window.currentRouteLine=null; }
+                            }}>닫기</button>
+                          </div>
+                        </>
+                    )}
+                  </div>
+              );
 
             })()}
-            </div>
+          </div>
 
-            <div className="footer">@Eazypark</div>
-            </aside>
+          <div className="footer">@Eazypark</div>
+        </aside>
 
         <main className="map-area">
           <div className="header-links">
@@ -1270,6 +1371,7 @@ export default function Main() {
               className="map-canvas"
               style={{ width: "100%", height: "100%" }}
           />
+          {go && nextTurn && <TurnBanner turn={nextTurn.turnType} dist={nextTurn.distM} />}
           {routeInfo?.destination && (
               <div className="route-toast-wrap">
                 <div className="route-toast route-toast--compact">
