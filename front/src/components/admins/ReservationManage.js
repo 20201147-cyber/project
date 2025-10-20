@@ -19,7 +19,7 @@ const ReservationManage = () => {
 
     // 서버에서 예약 데이터 가져오기
     useEffect(() => {
-        fetch("/api/findReserve", {
+        fetch("/api/reservations/findReserve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
         })

@@ -91,7 +91,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
 
             const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
             const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
-            setRouteInfo({ distance: distKm, time: timeMin, destination: park.PKLT_NM });
+            setRouteInfo({ distance: distKm, time: timeMin, destination: park.PKLT_NM, isParking: true });
         } catch (err) {
             console.error("경로 탐색 실패:", err);
         }
@@ -110,6 +110,8 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
     // 주행모드 on/off
     const handleSafeDriveClick = () => {
         setGO(prev => !prev);
+        const position = new window.kakao.maps.LatLng(coordinates.lat,coordinates.lng);
+        map.setCenter(position);
         // 주행모드 시작 시 현재 목적지 저장
         if (!go && routeInfo?.destination) {
             setOriginalDestination(routeInfo.destination);
@@ -331,7 +333,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                                     setShowModal(false);
                                 }}
                             >
-                                예
+
                             </button>
                             <button
                                 className="no-btn"

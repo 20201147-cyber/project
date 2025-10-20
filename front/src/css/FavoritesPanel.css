@@ -42,6 +42,7 @@
     font-weight: 700;
     border: 1px solid;
     background: #f8fafc;
+    width:80px;
 }
 .res-badge.day {
     color: #2563eb;           /* blue-600 */
@@ -163,3 +164,143 @@
 }
 .btn-cancel:active:not([disabled]){ transform: translateY(1px); }
 .btn-cancel[disabled]{ opacity: .6; cursor: not-allowed; border-color:#e5e7eb; color:#9ca3af; }
+/* 남은시간을 가로로 한 줄 차지 */
+.res-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 기본 3등분 */
+    gap: 10px;
+}
+
+/* 남은시간만 전체 가로 차지 */
+.res-cell.full-width {
+    grid-column: 1 / -1; /* 그리드 전체 열 차지 */
+}
+.btn-blue {
+    border-color: #007bff;
+    background: #fff;
+    color: #007bff;
+}
+.btn-blue:hover:not([disabled]) {
+    background: #e0f0ff;
+    box-shadow: 0 8px 20px rgba(0,123,255,.15);
+}
+
+/* 공통 disabled 스타일 */
+.btn-cancel[disabled],
+.btn-blue[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+    color: #9ca3af;
+}
+/* ===== 주변 주차장 찾기 전용 ===== */
+.nearby-list {
+    display: grid;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+/* 주변 주차장 카드 */
+.nearby-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 20px rgba(17, 24, 39, 0.08);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.nearby-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(17, 24, 39, 0.12);
+    border-color: rgba(37, 99, 235, 0.35);
+}
+
+/* 카드 헤더 */
+.nearby-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.nearby-title {
+    font-weight: 800;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+/* 카드 본문 */
+.nearby-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+.nearby-cell {
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* 경로 탐색 버튼 */
+.btn-path {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    padding: 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid #f59e0b;
+    background: #fff7ed;
+    color: #b45309;
+    transition: all 0.15s ease;
+}
+.btn-path:hover:not([disabled]) {
+    background: #ffedd5;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.15);
+}
+.btn-path:active:not([disabled]) {
+    transform: translateY(1px);
+}
+
+/* 닫기 버튼 */
+.btn-close-nearby {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid #ef4444;
+    background: #fff;
+    color: #ef4444;
+    font-weight: 700;
+}
+.btn-close-nearby:hover {
+    background: #fef2f2;
+}
+
+/* 다크모드 */
+@media (prefers-color-scheme: dark) {
+    .nearby-card { background:#0b0f17; border-color:rgba(255,255,255,.06); box-shadow:none; }
+    .nearby-title, .nearby-cell { color:#e5e7eb; }
+    .btn-path { background:#1c1c1c; border-color:#b45309; color:#fbbf24; }
+}
+.reserved-card {
+    border: 2px solid #f59e0b; /* 주황색 강조 */
+    background: #fff7ed;
+}
+
+.reserved-badge {
+    color: #b45309;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #ffedd5;
+    margin-left: 8px;
+}
