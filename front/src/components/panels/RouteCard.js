@@ -1,4 +1,4 @@
-// src/components/RouteCard.js
+// RouteCard.js
 import React from "react";
 
 export default function RouteCard({

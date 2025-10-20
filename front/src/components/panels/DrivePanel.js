@@ -28,10 +28,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
     // ✅ 경로탐색 함수 (기존 코드 그대로 옮김)
     const handleRouteSearch = async (park) => {
         if (!map) return;
-        if (window.__routeLocked && window.currentRouteLine) {
-        setRouteInfo(prev => ({ ...prev, destination: park.PKLT_NM })); // 정보만 변경
-        return; // 라인은 그대로
-    }
+
         const parkLat = parseFloat(park.LAT);
         const parkLng = parseFloat(park.LOT);
 
@@ -42,19 +39,16 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
 
         try {
             const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
-                },
-                body: JSON.stringify({
-                    startX,
-                    startY,
-                    endX,
-                    endY,
-                    reqCoordType: "WGS84GEO",
-                    resCoordType: "WGS84GEO"
-                })
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "appKey": "KTv2MthCTDaTxnVQ8hfUJ7mSHSdxii7j60hw5tPU"
+            },
+            body: JSON.stringify({
+                startX, startY, endX, endY,
+                reqCoordType: "WGS84GEO",
+                resCoordType: "WGS84GEO"
+            })
             });
 
             const data = await res.json();
@@ -65,37 +59,47 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             let totalDistance = "-";
 
             data.features.forEach((feature) => {
-                const props = feature.properties;
-                if (props.totalTime) {
-                    totalTime = props.totalTime;
-                    totalDistance = props.totalDistance;
-                }
-                if (feature.geometry?.type === "LineString") {
-                    feature.geometry.coordinates.forEach(([lon, lat]) => {
-                        pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
-                    });
-                }
+            const props = feature.properties;
+            if (props.totalTime) {
+                totalTime = props.totalTime;
+                totalDistance = props.totalDistance;
+            }
+            if (feature.geometry?.type === "LineString") {
+                feature.geometry.coordinates.forEach(([lon, lat]) => {
+                pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
+                });
+            }
             });
 
+            // 기존 라인 제거 후 새 라인 그리기
             if (window.currentRouteLine) window.currentRouteLine.setMap(null);
-
             const polyline = new window.kakao.maps.Polyline({
-                path: pathPoints,
-                strokeWeight: 5,
-                strokeColor: "#3897f0",
-                strokeOpacity: 1,
-                strokeStyle: "solid"
+            path: pathPoints,
+            strokeWeight: 5,
+            strokeColor: "#3897f0",
+            strokeOpacity: 1,
+            strokeStyle: "solid"
             });
             polyline.setMap(map);
             window.currentRouteLine = polyline;
 
             const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
             const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
-            setRouteInfo({ distance: distKm, time: timeMin, destination: park.PKLT_NM, isParking: true });
+
+            // 목적지를 새 주차장으로 “정식 변경” (주차장 플래그 포함)
+            setRouteInfo({
+            distance: distKm,
+            time: timeMin,
+            destination: park.PKLT_NM,
+            isParking: true
+            });
+
+            // 명시적 재탐색 후에도 자동 재탐색은 막아둠
+            window.__routeLocked = true;
         } catch (err) {
             console.error("경로 탐색 실패:", err);
         }
-    };
+        };
 
     const getStatus = (park) => {
         const total = Number(park.TPKCT) || 0;
@@ -121,10 +125,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
     // 원래 목적지로 돌아가기
     const handleReturnToOriginal = async () => {
         if (!map || !originalDestination) return;
-        if (window.__routeLocked && window.currentRouteLine) {
-            setRouteInfo(prev => ({ ...prev, destination: originalDestination })); // 정보만 변경
-            return; // 라인 그대로
-        }
+
         const destPark = ParkingList.find(p => p.PKLT_NM === originalDestination);
         if (!destPark) return;
 
@@ -333,7 +334,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                                     setShowModal(false);
                                 }}
                             >
-
+                                예
                             </button>
                             <button
                                 className="no-btn"

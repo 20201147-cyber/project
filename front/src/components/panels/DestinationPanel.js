@@ -1,3 +1,5 @@
+// DestinationPanel.js
+
 import React, { useState } from "react";
 
 export default function DestinationPanel({ map, coordinates, setGO, setMode,routeInfo,setRouteInfo }) {
