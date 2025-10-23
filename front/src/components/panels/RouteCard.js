@@ -54,7 +54,7 @@ export default function RouteCard({
     const fmtHM = s => s && s.length === 4 ? `${s.slice(0,2)}:${s.slice(2)}` : s || "-";
     //발표때 한번만
     const totalSpots = 1317;
-    const parkedCars = 480;
+    const parkedCars = 1280;
     const remaining = totalSpots - parkedCars;
     const fillPct = Math.round((remaining / totalSpots) * 100);
 

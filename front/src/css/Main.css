@@ -141,6 +141,7 @@ body {
 /* Inputs & Buttons */
 .input-wrap {
     display: flex;
+    flex: 1;
     align-items: center;
     background: var(--soft);
     border-radius: 16px;
@@ -166,16 +167,29 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
 }
 
-.primary-btn {
-    background: var(--ink);
-    color: #fff;
-    border: 1px solid var(--ink);
-    padding: 12px 16px;
-    border-radius: 14px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+/* 한 줄 배치 */
+.search-row{
+  display: flex;
+  align-items: center;
+  gap: 8px;         /* 입력칸-버튼 간격 */
+  width: 100%;
+}
+
+.primary-btn{
+  margin-left: 0;   /* 기존 auto 정렬 해제 */
+  /* 아래는 기존 스타일 유지 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ink);
+  color: #fff;
+  border: 1px solid var(--ink);
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
 
 .primary-btn-center {
