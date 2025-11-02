@@ -10,4 +10,11 @@ module.exports = function(app) {
             changeOrigin: true // 브라우저 CORS 우회
         })
     );
+    app.use(
+        '/ml',
+        createProxyMiddleware({
+            target: 'http://localhost:5000',
+            changeOrigin: true,
+        })
+    );
 };

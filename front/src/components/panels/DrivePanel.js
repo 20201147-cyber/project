@@ -15,10 +15,39 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
     return R * c; // km 단위
 };
 
-export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, routeInfo, setRouteInfo }) {
+// 🔽 turnType → 레이블/아이콘(간단표시) 매핑
+const TURN = {
+  12: { label: "좌회전", icon: "↰" },
+  13: { label: "우회전", icon: "↱" },
+  14: { label: "U턴",   icon: "↶" },
+};
+
+export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, routeInfo, setRouteInfo, maneuvers }) {
     const [nearbyParking, setNearbyParking] = useState([]);
     const [originalDestination, setOriginalDestination] = useState(routeInfo?.destination ?? null);
 
+    // 회전 표시에 필요한 상태 추가
+    const [turnInstructions, setTurnInstructions] = useState([]); // [{type, lat, lon}]
+    const [turnIndex, setTurnIndex] = useState(0);
+    const [nextTurn, setNextTurn] = useState(null);
+
+    // 🔹 Main에서 넘어온 maneuvers를 내부 회전리스트로 반영
+    useEffect(() => {
+        if (Array.isArray(maneuvers) && maneuvers.length) {
+        const turns = maneuvers.map(m => ({
+            type: m.turnType,
+            lat:  m.lat,
+            lon:  m.lon,
+        }));
+        setTurnInstructions(turns);
+        setTurnIndex(0);
+        setNextTurn(turns[0] || null);
+        } else {
+        setTurnInstructions([]);
+        setNextTurn(null);
+        }
+    }, [maneuvers]);
+    
     const [showModal, setShowModal] = useState(false);
     const [selectedPark, setSelectedPark] = useState(null);
 
@@ -57,6 +86,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             let pathPoints = [];
             let totalTime = "-";
             let totalDistance = "-";
+            const turns = []; // 🔽 회전 포인트 수집
 
             data.features.forEach((feature) => {
             const props = feature.properties;
@@ -64,10 +94,16 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                 totalTime = props.totalTime;
                 totalDistance = props.totalDistance;
             }
-            if (feature.geometry?.type === "LineString") {
-                feature.geometry.coordinates.forEach(([lon, lat]) => {
-                pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
-                });
+                if (feature.geometry?.type === "LineString") {
+                    feature.geometry.coordinates.forEach(([lon, lat]) => {
+                        pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
+                    });
+                    } else if (feature.geometry?.type === "Point") {
+                    const t = Number(props?.turnType);
+                    if ([12,13,14].includes(t)) {
+                        const [lon, lat] = feature.geometry.coordinates;
+                        turns.push({ type: t, lat, lon });
+                    }
             }
             });
 
@@ -93,6 +129,10 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             destination: park.PKLT_NM,
             isParking: true
             });
+            // 🔽 회전 목록 초기화
+            setTurnInstructions(turns);
+            setTurnIndex(0);
+            setNextTurn(turns[0] || null);
 
             // 명시적 재탐색 후에도 자동 재탐색은 막아둠
             window.__routeLocked = true;
@@ -157,6 +197,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             let pathPoints = [];
             let totalTime = "-";
             let totalDistance = "-";
+            const turns = [];
 
             data.features.forEach((feature) => {
                 const props = feature.properties;
@@ -168,6 +209,12 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                     feature.geometry.coordinates.forEach(([lon, lat]) => {
                         pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
                     });
+                    } else if (feature.geometry?.type === "Point") {
+                      const t = Number(props?.turnType);
+                      if ([12,13,14].includes(t)) {
+                        const [lon, lat] = feature.geometry.coordinates;
+                        turns.push({ type: t, lat, lon });
+                    }
                 }
             });
 
@@ -185,6 +232,9 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
             const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
             setRouteInfo({ distance: distKm, time: timeMin, destination: originalDestination });
+            setTurnInstructions(turns);
+            setTurnIndex(0);
+            setNextTurn(turns[0] || null);
         } catch (err) {
             console.error("원래 목적지 길찾기 실패:", err);
         }
@@ -223,6 +273,23 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [map]);
+
+    // 🔽 좌표가 바뀔 때, 다음 회전까지의 거리 보고 소진 처리
+    useEffect(() => {
+        if (!turnInstructions.length) { setNextTurn(null); return; }
+        const idx = Math.min(turnIndex, turnInstructions.length - 1);
+        const cur = turnInstructions[idx];
+        if (!cur) { setNextTurn(null); return; }
+        const dKm = calculateDistance(coordinates.lat, coordinates.lng, cur.lat, cur.lon);
+        // 35m 이내면 다음 회전으로 넘김
+        if (dKm < 0.035) {
+            const ni = Math.min(idx + 1, turnInstructions.length - 1);
+            setTurnIndex(ni);
+            setNextTurn(turnInstructions[ni] || null);
+        } else {
+            setNextTurn(cur);
+        }
+    }, [coordinates, turnInstructions, turnIndex]);
 
     // 가까운 주차장 5개 계산
     useEffect(() => {
@@ -345,6 +412,23 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                         </div>
                     </div>
                 </div>
+            )}
+            {/* ✅ (5) 오버레이 출력: 모달 블록 바로 아래, 닫는 </div> 직전 */}
+            {go && nextTurn && TURN[nextTurn.type] && (
+            <div className="turn-hint">
+                <span className="ic">{TURN[nextTurn.type].icon}</span>
+                <span className="tx">
+                {TURN[nextTurn.type].label}
+                <em>
+                    {(() => {
+                    const d = calculateDistance(
+                        coordinates.lat, coordinates.lng, nextTurn.lat, nextTurn.lon
+                    );
+                    return d < 1 ? ` ${Math.round(d * 1000)} m` : ` ${d.toFixed(1)} km`;
+                    })()}
+                </em>
+                </span>
+            </div>
             )}
         </div>
     );

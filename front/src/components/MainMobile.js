@@ -1,4 +1,3 @@
-//$env:HOST="0.0.0.0"; npm start 모바일넣은 파워셸 명령어
 import React, { useState, useEffect } from "react";
 import "../css/MainMobile.css";
 
@@ -13,28 +12,55 @@ export default function MainMobile() {
     const [go, setGO] = useState(false);
     const [parkingList, setParkingList] = useState([]);
 
-    // 카카오 지도 초기화
+    // 1️⃣ Kakao 지도 SDK 로드 및 초기화
     useEffect(() => {
-        window.kakao.maps.load(() => {
-            const container = document.getElementById("map-mobile");
-            const options = { center: new window.kakao.maps.LatLng(coordinates.lat, coordinates.lng), level: 3 };
-            const mapInstance = new window.kakao.maps.Map(container, options);
-            setMap(mapInstance);
-        });
-    }, []);
+        // 스크립트 중복 방지
+        if (document.getElementById("kakao-map-script")) {
+            if (window.kakao && !map) initMap();
+            return;
+        }
 
+        const script = document.createElement("script");
+        script.id = "kakao-map-script";
+        script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=e976d6b999ba7e5b40468df4f16b5a55&autoload=false";
+        script.async = true;
+        document.head.appendChild(script);
+
+        script.onload = () => {
+            initMap();
+        };
+
+        const initMap = () => {
+            if (!window.kakao) return;
+            window.kakao.maps.load(() => {
+                const container = document.getElementById("map-mobile");
+                const options = {
+                    center: new window.kakao.maps.LatLng(coordinates.lat, coordinates.lng),
+                    level: 3
+                };
+                const mapInstance = new window.kakao.maps.Map(container, options);
+                setMap(mapInstance);
+            });
+        };
+
+        return () => {
+            document.head.removeChild(script);
+        };
+    }, [coordinates]);
+
+    // 2️⃣ 마커 및 클러스터링
     useEffect(() => {
         if (!map) return;
 
         const fetchAndShowMarkers = async () => {
             try {
                 const response = await fetch("/api/mobile-api/parking");
+                const data = await response.json();
 
-                const data=await response.json();
                 const realtimeList = data.realtime.GetParkingInfo?.row || [];
                 const fullParkingList = data.parkInfo.GetParkInfo?.row || [];
 
-                // 이름 기준 중복 제거 + 기존 속성 보존
+                // 이름 기준 중복 제거
                 const parkMapByName = {};
                 fullParkingList.forEach((park) => {
                     const name = park.PKLT_NM;
@@ -51,7 +77,7 @@ export default function MainMobile() {
                     LOT: park.LOTs[0],
                 }));
 
-                // 실시간 데이터 이름 기준 합산
+                // 실시간 데이터 합산
                 const realtimeMapByName = {};
                 realtimeList.forEach((item) => {
                     const name = item.PKLT_NM;
@@ -60,7 +86,7 @@ export default function MainMobile() {
                     realtimeMapByName[name] += item.NOW_PRK_VHCL_CNT ?? 0;
                 });
 
-                // 정적 + 실시간 병합
+                // 병합
                 const mergedParkingList = uniqueParkingList.map((park) => {
                     const liveCnt = realtimeMapByName[park.PKLT_NM] ?? null;
                     const remainCnt = liveCnt != null ? park.TPKCT - liveCnt : null;
@@ -70,7 +96,12 @@ export default function MainMobile() {
                 setParkingList(mergedParkingList);
 
                 // 마커 생성
-                const clusterer = new window.kakao.maps.MarkerClusterer({ map, averageCenter: true, minLevel: 6 });
+                const clusterer = new window.kakao.maps.MarkerClusterer({
+                    map,
+                    averageCenter: true,
+                    minLevel: 6
+                });
+
                 const markers = mergedParkingList.map((park) => {
                     const marker = new window.kakao.maps.Marker({
                         position: new window.kakao.maps.LatLng(park.LAT, park.LOT),
@@ -95,6 +126,7 @@ export default function MainMobile() {
 
                     return marker;
                 });
+
                 clusterer.addMarkers(markers);
 
             } catch (err) {
@@ -113,13 +145,28 @@ export default function MainMobile() {
                     <span className="pill">Beta</span>
                 </div>
                 <div className="tabs-mobile">
-                    <button className={`tab-mobile ${mode === "destination" ? "active" : ""}`} onClick={() => setMode("destination")}>목적지</button>
-                    <button className={`tab-mobile ${mode === "drive" ? "active" : ""}`} onClick={() => setMode("drive")}>주행</button>
-                    <button className={`tab-mobile ${mode === "favorites" ? "active" : ""}`} onClick={() => setMode("favorites")}>즐겨찾기</button>
+                    <button
+                        className={`tab-mobile ${mode === "destination" ? "active" : ""}`}
+                        onClick={() => setMode("destination")}
+                    >
+                        목적지
+                    </button>
+                    <button
+                        className={`tab-mobile ${mode === "drive" ? "active" : ""}`}
+                        onClick={() => setMode("drive")}
+                    >
+                        주행
+                    </button>
+                    <button
+                        className={`tab-mobile ${mode === "favorites" ? "active" : ""}`}
+                        onClick={() => setMode("favorites")}
+                    >
+                        즐겨찾기
+                    </button>
                 </div>
             </header>
 
-            <div id="map-mobile" className="map-mobile" />
+            <div id="map-mobile" className="map-mobile" style={{ width: "100%", height: "400px" }} />
 
             <div className="panel-mobile">
                 {mode === "destination" && <DestinationPanel map={map} coordinates={coordinates} ParkingList={parkingList} />}

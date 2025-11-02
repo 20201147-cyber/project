@@ -1,62 +1,154 @@
+/* ===== Reset: 페이지 기본 여백 제거 (이게 가장 중요) ===== */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+* { box-sizing: border-box; }
+
+/* 페이지 공통 */
 .admin-page {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* 수직 Navbar */
-.vertical-navbar {
-    background-color: #f8f9fa;
-    height: calc(100vh - 56px); /* 상단 수평 Navbar 높이 제외 */
-    border-right: 1px solid #dee2e6;
-    width: 220px;
+/* === Left Sidebar (CleanPay 유사 스타일) === */
+:root{
+  --sidebar-bg:#0f1e36;
+  --sidebar-text:#cbd5e1;
+  --sidebar-hover:rgba(255,255,255,.08);
+  --sidebar-active:#2f80ed;
+  --sidebar-active-bg:rgba(47,128,237,.18);
 }
 
-.vertical-navbar .nav-link {
-    color: #495057;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+.vertical-navbar{
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  height: calc(100vh - 56px);   /* 상단바 제외 전체 높이 */
+  border-right: none;            /* 테두리 제거 */
+  width: 240px;                  /* 고정 폭 */
+  padding: 18px 12px;
+  box-shadow: 8px 0 24px rgba(15,23,42,.08);
 }
 
-.vertical-navbar .nav-link:hover {
-    background-color: #e9ecef;
-    border-radius: 4px;
+/* 링크 기본 모양 */
+.vertical-navbar .nav-link{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sidebar-text) !important;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+  margin-bottom: 6px;
+  text-decoration: none;
+}
+
+/* 호버 */
+.vertical-navbar .nav-link:hover{
+  background: var(--sidebar-hover);
+  color: #fff !important;
+  transform: translateX(2px);
+}
+
+/* 활성(선택) */
+.vertical-navbar .nav-link.active{
+  background: var(--sidebar-active-bg);
+  color: #fff !important;
+}
+.vertical-navbar .nav-link.active::before{
+  content:"";
+  position:absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 2px;
+  background: var(--sidebar-active);
 }
 
 /* 메인 콘텐츠 */
 .main-content h2 {
-    color: #343a40;
+  color: #343a40;
 }
 
 /* 카드 스타일 */
 .admin-card {
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
 }
-
 .admin-card:hover {
-    transform: translateY(-3px);
+  transform: translateY(-3px);
 }
 
 /* 통계 카드 */
 .stats-card {
-    margin-top: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    padding: 2rem;
-}
-.custom-navbar {
-    background-color: #fff !important; /* 흰색 배경 */
-    border-bottom: 1px solid #dee2e6; /* 회색 수평선 */
+  margin-top: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 2rem;
 }
 
+/* ===== Top Navbar (로고 완전 좌측 고정) ===== */
+.custom-navbar {
+  background-color: #fff !important;    /* 흰색 배경 */
+  border-bottom: 1px solid #dee2e6;     /* 회색 수평선 */
+  padding-left: 0 !important;           /* 네비바 자체 좌우 패딩 제거 */
+  padding-right: 0 !important;
+}
+
+/* 컨테이너가 좌우에 주는 기본 패딩/마진/최대폭 제거 */
+.custom-navbar .container,
+.custom-navbar .container-fluid {
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 브랜드(로고) 절대 왼쪽 */
+.custom-navbar .navbar-brand {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* 링크 색상 */
 .custom-navbar .navbar-brand,
 .custom-navbar .nav-link {
-    color: #000 !important; /* 글씨 검정 */
+  color: #000 !important; /* 글씨 검정 */
 }
-
 .custom-navbar .nav-link:hover {
-    color: #555 !important;
+  color: #555 !important;
 }
 
+/* 1) 변수 추가 */
+:root{
+  --sidebar-w: 240px;   /* 사이드바 폭 */
+  --content-pad: 1.5rem; /* .main-content.p-4 의 1.5rem 과 동일 */
+}
 
+/* 2) 사이드바 폭을 변수로 */
+.vertical-navbar{
+  width: var(--sidebar-w);
+}
 
+/* 3) 상단 컨테이너를 플렉스 정렬 */
+.custom-navbar .container,
+.custom-navbar .container-fluid{
+  padding-right: var(--content-pad) !important; /* 기존 0에서 변경 */
+}
+
+/* 4) 로고 박스를 사이드바 폭과 동일하게, 안에서 가운데 정렬 */
+.custom-navbar .navbar-brand{
+  width: var(--sidebar-w);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  padding: 0 !important;
+  white-space: nowrap;
+}

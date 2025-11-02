@@ -1,6 +1,6 @@
 // RouteCard.js
 import React from "react";
-
+import {useState,useEffect} from "react";
 export default function RouteCard({
                                       map,
                                       coordinates,
@@ -25,7 +25,8 @@ export default function RouteCard({
                                       TICKETS,
                                       HOURS_24,
                                       pad2,
-                                      calcTicketPrice
+                                      calcTicketPrice,
+                                      predictedRemain
                                   }) {
     if (mode !== "destination" || !routeInfo?.destination) return null;
 
@@ -249,9 +250,9 @@ export default function RouteCard({
 
                         {/* 3개 카드: 정가운데 정렬 */}
                         <div className="stats-row arrival-row">
-                            <div className="ep-stat2"><span>총자리</span><b>{arrivalTotal}</b></div>
-                            <div className="ep-stat2"><span>주차된 차량</span><b>{arrivalParked}</b></div>
-                            <div className="ep-stat2"><span>도착시 여석</span><b>{arrivalRemain}</b></div>
+                            <div className="ep-stat2"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
+                            <div className="ep-stat2"><span>주차된 차량</span><b>{park.TPKCT - (predictedRemain != null ? Math.round(predictedRemain) : 0)}</b></div>
+                            <div className="ep-stat2"><span>도착시 여석</span><b>{predictedRemain != null ? Math.round(predictedRemain) : "-"}</b></div>
                         </div>
 
                         {/* 도착시 혼잡도 게이지 (항상 노출) */}

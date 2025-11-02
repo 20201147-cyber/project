@@ -138,9 +138,9 @@ export default function DestinationPanel({ map, coordinates, setGO, setMode,rout
                 />
             </div>
 
-                <button className="primary-btn" onClick={searchTmapPOI}>
-                    검색
-                </button>
+            <button className="primary-btn" onClick={searchTmapPOI}>
+                검색
+            </button>
             </div>
 
             <hr />

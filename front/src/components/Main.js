@@ -41,6 +41,7 @@ export default function Main() {
   const [user, setUser] = useState(null);
   const [startTime,setStartTime] = useState(null);
   const [showArriveModal, setShowArriveModal] = useState(false);
+  const [predictedRemain, setPredictedRemain] = useState(null);
   //컨텍스트 사용
   const {visibleOnly, setVisibleOnly} = useContext(ParkingContext);
   const {buildMarkerImage,buildOverlayHTML}=useContext(MarkerContext);
@@ -50,8 +51,35 @@ export default function Main() {
   // 도착지명/ETA/예상 여석(가능하면)
   const destName = routeInfo?.destination || null;
   const timeMin = routeInfo?.time ?? routeInfo?.timeMin;
+  //파이썬 회귀분석
+  useEffect(() => {
+    if (!routeInfo?.destination || !visibleOnly?.length) return;
 
+    const matchedPark = visibleOnly.find(
+        park => park.PKLT_NM === routeInfo.destination
+    );
+    if (!matchedPark) return;
 
+    const targetCd = matchedPark.PKLT_CD;
+    const minutesAhead = routeInfo.time ?? routeInfo.timeMin;
+    if (minutesAhead == null) return;
+
+    fetch("http://localhost:5000/ml/predict_remain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        target_cd: targetCd,
+        minutesAhead: minutesAhead
+      }),
+    })
+        .then(async res => {
+          if (!res.ok) throw new Error(await res.text());
+          return res.json();
+        })
+        .then(data => setPredictedRemain(data.predictedRemain))
+        .catch(err => console.error("예측 요청 오류:", err));
+
+  }, [routeInfo]);
   // 로그인/로그아웃 버튼 클릭 핸들러
   const handleLogout = () => {
     fetch("/api/auth/logout", { method: "POST" })
@@ -177,6 +205,9 @@ export default function Main() {
       endY: routeInfo.destLat,
     });
     if (!data) return;
+    // ⬇️ 회전 지점 추출(비주차장도 동일 포맷)
+    setManeuvers(extractManeuvers(data));
+
     const { pathPoints } = parseTmapGeojsonToPolyline(data);
 
     clearRoutePath?.();
@@ -218,11 +249,19 @@ export default function Main() {
       const startX = coordinates.lng;
       const startY = coordinates.lat;
 
-      const endPark = parkingList.find(p => p.PKLT_NM === routeInfo.destination);
-      if (!endPark) return;
-
-      const endX = parseFloat(endPark.LOT);
-      const endY = parseFloat(endPark.LAT);
+      // ⬇️ 주차장/비주차장 모두 처리
+      let endX, endY;
+      if (routeInfo.isParking) {
+        const endPark = parkingList.find(p => p.PKLT_NM === routeInfo.destination);
+        if (!endPark) return;
+        endX = parseFloat(endPark.LOT);
+        endY = parseFloat(endPark.LAT);
+      } else {
+        // 비주차장: 저장된 좌표 사용
+        if (typeof routeInfo.destLng !== "number" || typeof routeInfo.destLat !== "number") return;
+        endX = routeInfo.destLng;
+        endY = routeInfo.destLat;
+      }
 
       try {
         const res = await fetch("https://apis.openapi.sk.com/tmap/routes?version=1", {
@@ -240,6 +279,7 @@ export default function Main() {
 
         const data = await res.json();
         if (!data.features || !data.features.length) return;
+        // ⬇️ 주차장/비주차장 공통: 회전 지점 반영
         setManeuvers(extractManeuvers(data));
 
         let pathPoints = [];
@@ -457,10 +497,24 @@ export default function Main() {
       destination: destName,
     }));
   }
-
+  /*
   // CSV 전체 파싱 (주차장별 데이터 구조화)
   useEffect(() => {
-    Papa.parse("/20250922.csv", {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 일=0, 월=1, ..., 수=3
+    const lastWeekDate = new Date(today);
+    lastWeekDate.setDate(today.getDate() - 7); // 7일 전
+    // 원하는 요일로 맞추기 (예: 오늘이 수요일이면 지난주 수요일)
+    const diff = dayOfWeek - lastWeekDate.getDay();
+    lastWeekDate.setDate(lastWeekDate.getDate() + diff);
+
+    // 파일명 생성: YYYYMMDD 형식
+    const yyyy = lastWeekDate.getFullYear();
+    const mm = String(lastWeekDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(lastWeekDate.getDate()).padStart(2, "0");
+    const fileName = `/${yyyy}${mm}${dd}.csv`;
+    console.log(fileName)
+    Papa.parse("../../parking_data/20251004.csv", {
       download: true,
       header: true,
       complete: (result) => {
@@ -479,6 +533,32 @@ export default function Main() {
       },
       error: (err) => console.error("CSV 파싱 에러:", err),
     });
+  }, []);*/
+  useEffect(() => {
+    const fetchLastWeekData = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/ml/parking_data"); // 서버 주소 포함
+        if (!res.ok) throw new Error("데이터 요청 실패");
+        const data = await res.json();
+
+        const grouped = {};
+        data.forEach((row) => {
+          const name = row.PKLT_NM;
+          if (!name) return;
+          if (!grouped[name]) grouped[name] = [];
+          grouped[name].push({
+            time: row.timestamp ? row.timestamp.split(" ")[1].slice(0, 5) : "",
+            liveCnt: Number(row.liveCnt) || 0,
+            remainCnt: Number(row.remainCnt) || 0,
+          });
+        });
+        setCsvDataByName(grouped);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchLastWeekData();
   }, []);
 
   //스로틀에 사용
@@ -847,6 +927,7 @@ export default function Main() {
                     ParkingList={parkingList}
                     routeInfo={routeInfo}
                     setRouteInfo={setRouteInfo}
+                    maneuvers={maneuvers}
                     hideLegacyBottom
                 />
             )}
@@ -855,7 +936,7 @@ export default function Main() {
             {/* ✅ 경로가 생기면 카드만 노출 (중복 제거) */}
             {mode === "destination" && routeInfo?.destination && (
                 <RouteCard
-                    coordinates={coordinates} mode={mode} routeInfo={routeInfo} parkingList={parkingList} reserveMode={reserveMode} setReserveMode={setReserveMode} selectedTicket={selectedTicket} setSelectedTicket={setSelectedTicket} agree={agree} setAgree={setAgree} startTime={startTime} setStartTime={setStartTime} endTime={endTime} user={user} onEditRoute={onEditRoute} onReserve={onReserve} setGO={setGO} setMode={setMode} setRouteInfo={setRouteInfo} TICKETS={TICKETS} HOURS_24={HOURS_24} pad2={pad2} calcTicketPrice={calcTicketPrice} map={map}
+                    coordinates={coordinates} mode={mode} routeInfo={routeInfo} parkingList={parkingList} reserveMode={reserveMode} setReserveMode={setReserveMode} selectedTicket={selectedTicket} setSelectedTicket={setSelectedTicket} agree={agree} setAgree={setAgree} startTime={startTime} setStartTime={setStartTime} endTime={endTime} user={user} onEditRoute={onEditRoute} onReserve={onReserve} setGO={setGO} setMode={setMode} setRouteInfo={setRouteInfo} TICKETS={TICKETS} HOURS_24={HOURS_24} pad2={pad2} calcTicketPrice={calcTicketPrice} map={map} predictedRemain={predictedRemain}
                 />
             )}
           </div>

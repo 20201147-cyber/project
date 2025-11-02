@@ -1,3 +1,5 @@
+/* DrivePanel.css */
+
 /* ===== Modal v3 — site unified style ===== */
 
 /* Overlay: 유리효과 + 딤 */
@@ -175,4 +177,63 @@
   .modal3.modal3--compact p{ font-size: 13px; }
   .modal3.modal3--compact .yes-btn,
   .modal3.modal3--compact .no-btn{ height: 34px; padding: 0 10px; }
+}
+
+/* === Turn hint (작은 오버레이) === */
+.turn-hint{
+  position: fixed;
+  top: 78px;                 /* 헤더 아래 살짝 */
+  right: 22px;               /* 우측 여백 */
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  font-weight: 800;
+  color: #111827;
+}
+.turn-hint .ic{
+  font-size: 16px;           /* ↰ ↱ ↶ 아이콘 */
+  line-height: 1;
+}
+.turn-hint .tx{ font-size: 13px; }
+.turn-hint .tx em{
+  font-style: normal;
+  color: #6b7280;
+  margin-left: 6px;
+  font-weight: 700;
+}
+@media (max-width: 720px){
+  .turn-hint{ top: 66px; right: 12px; padding: 5px 8px; }
+  .turn-hint .tx{ font-size: 12px; }
+}
+
+/* Turn hint 살짝 키우기 */
+.turn-hint{
+  padding: 8px 12px;        /* 6x10 → 8x12 */
+  border-radius: 14px;      /* 살짝 둥글게 */
+}
+
+.turn-hint .ic{
+  font-size: 22px;          /* 16 → 22 (아이콘 크게) */
+}
+
+.turn-hint .tx{
+  font-size: 14px;          /* 13 → 14 */
+}
+
+.turn-hint .tx em{
+  font-size: 12px;          /* 거리 글씨도 약간 키움 */
+}
+
+/* 모바일에서는 과하지 않게 */
+@media (max-width: 720px){
+  .turn-hint{ padding: 7px 10px; }
+  .turn-hint .ic{ font-size: 20px; }
+  .turn-hint .tx{ font-size: 13px; }
+  .turn-hint .tx em{ font-size: 11px; }
 }
