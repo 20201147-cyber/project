@@ -140,8 +140,8 @@ body {
 
 /* Inputs & Buttons */
 .input-wrap {
-    display: flex;
     flex: 1;
+    display: flex;
     align-items: center;
     background: var(--soft);
     border-radius: 16px;
@@ -175,6 +175,7 @@ body {
   width: 100%;
 }
 
+/* 버튼은 오른쪽에, 위 마진 제거 */
 .primary-btn{
   margin-left: 0;   /* 기존 auto 정렬 해제 */
   /* 아래는 기존 스타일 유지 */

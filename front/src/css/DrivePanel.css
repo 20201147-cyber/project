@@ -62,10 +62,10 @@
   font-weight: 800;
   cursor: pointer;
   transition:
-    background-color .2s var(--ease-out, cubic-bezier(.16,1,.3,1)),
-    border-color .2s var(--ease-out, cubic-bezier(.16,1,.3,1)),
-    box-shadow .2s var(--ease-out, cubic-bezier(.16,1,.3,1)),
-    transform .12s var(--ease-out, cubic-bezier(.16,1,.3,1));
+          background-color .2s var(--ease-out, cubic-bezier(.16,1,.3,1)),
+          border-color .2s var(--ease-out, cubic-bezier(.16,1,.3,1)),
+          box-shadow .2s var(--ease-out, cubic-bezier(.16,1,.3,1)),
+          transform .12s var(--ease-out, cubic-bezier(.16,1,.3,1));
 }
 
 /* Primary */
@@ -97,8 +97,8 @@
 .modal3 :is(.yes-btn, .no-btn):focus-visible{
   outline: none;
   box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--ink, #3897f0), transparent 70%),
-    0 0 0 1px var(--ink, #3897f0) inset;
+          0 0 0 3px color-mix(in srgb, var(--ink, #3897f0), transparent 70%),
+          0 0 0 1px var(--ink, #3897f0) inset;
 }
 
 /* Close 아이콘이 있다면 오른쪽 상단 배치(선택) */

@@ -1,125 +1,134 @@
 @import url('./Main.css'); /* 기존 PC용 CSS를 가져와 재사용 */
-
 :root {
-    --mobile-bg: #f6f6f6;
-    --mobile-ink: #3897f0;
-    --mobile-muted: #6b7280;
-    --mobile-panel: #fff;
-    --mobile-soft: #f3f4f6;
+    --base-font-size: 16px;
+    --scale-factor: 2; /* 1.5배 확대 */
+}
+.app2 {
+    display: block;
+    height: 100vh; /* 전체 높이 유지 */
+    overflow: hidden; /* 전체는 숨김 */
 }
 
-* {
-    box-sizing: border-box;
-}
-
-body, html, #root {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    background: var(--mobile-bg);
-}
-
-/* 모바일용 전체 레이아웃 */
-.app-mobile {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-}
-
-/* 상단 헤더 */
-.mobile-header {
-    display: flex;
-    flex-direction: column;
-    background: var(--mobile-panel);
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.brand-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.brand {
-    font-size: 50px;
-    font-weight: 800;
-    font-family: 'Great Vibes', cursive;
-}
-
-.pill {
-    font-size: 11px;
-    color: var(--mobile-muted);
-    background: var(--mobile-soft);
-    padding: 2px 6px;
-    border-radius: 999px;
-}
-
-.tabs-mobile {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-}
-
-.tab-mobile {
-    flex: 1;
-    text-align: center;
-    padding: 8px 0;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 2px;
-    background: var(--mobile-soft);
-    border: 1px solid #eee;
-    cursor: pointer;
-}
-
-.tab-mobile.active {
-    background: var(--mobile-ink);
-    color: #fff;
-}
-
-/* 지도 영역 */
-.map-mobile {
-    flex: 1;
+.map-area2 {
+    height: 40vh;
     width: 100%;
-    height: 50vh; /* 모바일 화면에서 절반 정도 차지 */
-    background: #dfe7ef;
+    overflow: hidden; /* 지도는 고정 */
 }
-
-/* 패널 영역 */
-.panel-mobile {
-    flex: 1;
+.sidebar2 {
+    position: fixed;        /* ✅ 화면 하단 고정 */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40vh;
+    background: white;
+    border-top: 1px solid var(--line);
     overflow-y: auto;
-    background: var(--mobile-panel);
-    padding: 12px;
+    transition: height 0.3s ease-in-out; /* ✅ 부드럽게 전환 */
+    z-index: 999; /* 지도 위로 */
 }
 
-/* info window 재활용 */
-.my-infowindow {
-    width: 200px;
-    padding: 8px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    font-size: 13px;
+.sidebar2.open {
+    height: 65vh; /* ✅ 버튼 누르면 전체 확장 */
 }
 
-.my-infowindow h4 {
-    margin: 0 0 4px 0;
-    font-size: 15px;
-    color: #0078ff;
+/* 사이드바 위의 토글 버튼 */
+.sidebar-toggle-btn {
+    position: fixed;
+    bottom: 40vh;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: bottom 0.3s ease-in-out;
+    background: #3897f0;
+    color: white;
+    border: none;
+    border-radius: 12px 12px 0 0;
+    width: 80px;
+    height: 28px;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 1000;
 }
 
-.my-infowindow p {
-    margin: 2px 0;
-    font-size: 12px;
+/* 사이드바 열릴 때 버튼도 올라가기 */
+.sidebar-toggle-btn.open {
+    bottom: 65vh;
+}
+.sidebar2 .panel-wrap {
+    flex: 1; /* 남은 공간 채우기 */
+    overflow-y: auto; /* 스크롤 가능 */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 60px; /* 마지막 요소 안잘리게 여백 */
+}
+.brand{
+    height:5vh;
+}
+.brand2{
+    font-size: 80px;
+}
+.tabs2{
+    font-size:50px;
+}
+.ep-overlay2{
+    width:400px;
+}
+.ep-overlay__title2{
+    font-size:20px;
+}
+.ep-overlay__badge2{
+    font-size:20px;
+    margin-left:80px;
+}
+.ep-close2{
+    font-size:20px;
+    margin-right:25px;
+    color:white;
+    margin-bottom:3px;
+}
+.ep-overlay__body2{
+    font-size:25px;
+}
+.ep-kv2{
+    font-size:30px;
+}
+.ep-row2{
+    font-size:25px;
+}
+.ep-overlay__btn2{
+    font-size:25px;
 }
 
-/* 모바일 전용 버튼 크기 조정 */
-.primary-btn-center {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 13px;
+/* === 모바일: '목적지 탐색' 검색창 한 줄 배치 === */
+
+/* 버튼이 전체폭으로 내려가는 기본 스타일 덮어쓰기 */
+.sidebar2 .primary-btn-center {
+  width: auto;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* "목적지 탐색" 바로 밑 첫 input-wrap */
+.sidebar2 .panel-wrap .section-title + .input-wrap {
+  display: inline-flex;
+  align-items: center;
+  width: calc(100% - 120px);   /* 오른쪽 버튼 자리 확보 */
+  margin-right: 8px;
+  height: 52px;                /* 버튼과 동일 높이 */
+}
+
+/* 그 다음 오는 검색 버튼을 오른쪽에 붙이기 */
+.sidebar2 .panel-wrap .section-title + .input-wrap + .primary-btn-center {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;                /* 인풋과 동일 높이 */
+  vertical-align: middle;
+  padding: 0 24px;             /* 세로는 height로 맞추고, 가로만 패딩 */
+}
+
+/* 인풋은 남은 공간을 꽉 채우게 */
+.sidebar2 .panel-wrap .section-title + .input-wrap .input {
+  width: 100%;
 }

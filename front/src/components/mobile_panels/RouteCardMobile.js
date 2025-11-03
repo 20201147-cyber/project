@@ -1,7 +1,7 @@
 // RouteCard.js
 import React from "react";
 import {useState,useEffect} from "react";
-export default function RouteCard({
+export default function RouteCardMobile({
                                       map,
                                       coordinates,
                                       mode,
@@ -67,10 +67,10 @@ export default function RouteCard({
     const arrivalLabel  = arrivalPct >= 50 ? "여유" : arrivalPct >= 20 ? "보통" : "혼잡";
 
     return (
-        <div className="route-card mt-12">
+        <div className="route-card mt-12" >
             <div className="route-title-row">
-                <div className="route-title">{routeInfo.destination}</div>
-                <button className="btn-edit" onClick={onEditRoute} aria-label="경로 수정">
+                <div className="route-title" style={{fontSize:30}}>{routeInfo.destination}</div>
+                <button className="btn-edit" style={{fontSize:30}} onClick={onEditRoute} aria-label="경로 수정">
                     <svg className="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M12 20h9"/>
                         <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
@@ -79,22 +79,22 @@ export default function RouteCard({
             </div>
 
             <div className="ep-drive-badges">
-                <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
-                <span className={`badge ${status.variant}`}>{status.label}</span>
-                {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
+                <span className={`badge ${chargeClass}`} style={{fontSize:20}}>{park.CHGD_FREE_NM ?? "-"}</span>
+                <span className={`badge ${status.variant}`} style={{fontSize:20}}>{status.label}</span>
+                {park.PKLT_KND_NM && <span className="badge outline" style={{fontSize:20}}>{park.PKLT_KND_NM}</span>}
             </div>
 
             {reserveMode ? (
                 <>
-                    <div className="ep-drive-stats">
-                        <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
-                        <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
-                        <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
+                    <div className="ep-drive-stats" >
+                        <div className="ep-stat"><span style={{fontSize:20}}>거리</span><b style={{fontSize:30}}>{distanceStr} km</b></div>
+                        <div className="ep-stat"><span style={{fontSize:20}}>도착시간</span><b style={{fontSize:30}}>{eta}</b></div>
+                        <div className="ep-stat"><span style={{fontSize:20}}>현재 여석</span><b style={{fontSize:30}}>{expectedRemain}</b></div>
                     </div>
                     <hr/>
 
                     {/* 권종 선택 */}
-                    <div className="section-title" style={{marginTop:8}}>권종 선택</div>
+                    <div className="section-title" style={{marginTop:8,fontSize:20}}>권종 선택</div>
                     <div className="ticket-grid">
                         {TICKETS.map(t => {
                             const price = calcTicketPrice(park, t.minutes, t.key);
@@ -104,9 +104,10 @@ export default function RouteCard({
                                     key={t.key}
                                     className={`ticket ${active ? "active" : ""}`}
                                     onClick={() => setSelectedTicket({ ...t, price })}
+                                    style={{fontSize:20}}
                                 >
-                                    <div className="ticket-label">{t.label}</div>
-                                    <div className="ticket-price">
+                                    <div className="ticket-label" style={{fontSize:20}}>{t.label}</div>
+                                    <div className="ticket-price" style={{fontSize:20}}>
                                         {price == null ? "무료" : `${price.toLocaleString()}원`}
                                     </div>
                                 </button>
@@ -118,7 +119,7 @@ export default function RouteCard({
                     <div className="reserve-summary">
                         {/* 시작 */}
                         <div className="summary-item start">
-                            <span>시작</span>
+                            <span style={{fontSize:30}}>시작</span>
                             <select className="time-select" value={startTime || ""} onChange={e=>setStartTime(e.target.value)}>
                                 <option value="" disabled>시간 선택</option>
                                 {HOURS_24.map(h => {
@@ -130,26 +131,26 @@ export default function RouteCard({
 
                         {/* 선택 권종 */}
                         <div className="summary-item">
-                            <span>시간</span>
+                            <span style={{fontSize:30}}>시간</span>
                             <b>{selectedTicket ? selectedTicket.label : "-"}</b>
                         </div>
 
                         {/* 종료(자동 계산) */}
                         <div className="summary-item">
-                            <span>종료시간</span>
-                            <b>{endTime}</b>
+                            <span style={{fontSize:30}}>종료시간</span>
+                            <b >{endTime}</b>
                         </div>
 
                         {/* 결제금액 */}
                         <div className="summary-item">
-                            <span>결제금액</span>
+                            <span style={{fontSize:30}}>결제금액</span>
                             <b>{selectedTicket?.price == null ? "-" : `${selectedTicket.price.toLocaleString()}원`}</b>
                         </div>
                     </div>
 
                     <label className="agree-row">
-                        <input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} />
-                        <span>이용 안내 및 환불정책에 동의합니다</span>
+                        <input type="checkbox" checked={agree} onChange={e=>setAgree(e.target.checked)} style={{fontSize:30}}/>
+                        <span style={{fontSize:30}}>이용 안내 및 환불정책에 동의합니다</span>
                     </label>
 
                     <div className="route-actions">
@@ -218,10 +219,12 @@ export default function RouteCard({
                                     }
                                 }
                             }}
+                            style={{fontSize:30,height:60}}
                         >
                             예약 확정
                         </button>
                         <button
+                            style={{fontSize:30,height:60}}
                             className="btn btn-close"
                             onClick={() => { setReserveMode(false); setSelectedTicket(null); setAgree(false); }}
                         >
@@ -233,9 +236,9 @@ export default function RouteCard({
 
                 <>
                     <div className="ep-drive-stats">
-                        <div className="ep-stat"><span>거리</span><b>{distanceStr} km</b></div>
-                        <div className="ep-stat"><span>소요시간</span><b>{timeMin} 분</b></div>
-                        <div className="ep-stat"><span>도착시간</span><b>{eta}</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>거리</span><b style={{fontSize:30}}>{distanceStr} km</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>소요시간</span><b style={{fontSize:30}}>{timeMin} 분</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>도착시간</span><b style={{fontSize:30}}>{eta}</b></div>
                     </div>
                     <hr/>
 
@@ -244,15 +247,15 @@ export default function RouteCard({
                         {/* 헤더 */}
                         <div className="arrival-head" style={{fontSize:"20px"}}>
                             <span className="loading-mini" aria-hidden="true"></span>
-                            <span>도착시</span>
-                            <b style={{ marginLeft: 6 }}>{eta}</b>
+                            <span  style={{fontSize:30}}>도착시</span>
+                            <b style={{ marginLeft: 6,fontSize:30 }}>{eta}</b>
                         </div>
 
                         {/* 3개 카드: 정가운데 정렬 */}
                         <div className="stats-row arrival-row">
-                            <div className="ep-stat2"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
-                            <div className="ep-stat2"><span>주차된 차량</span><b>{park.TPKCT - (predictedRemain != null ? Math.round(predictedRemain) : 0)}</b></div>
-                            <div className="ep-stat2"><span>도착시 여석</span><b>{predictedRemain != null ? Math.round(predictedRemain) : "-"}</b></div>
+                            <div className="ep-stat2"><span  style={{fontSize:30}}>총자리</span><b  style={{fontSize:30}}>{park.TPKCT ?? "-"}</b></div>
+                            <div className="ep-stat2"><span  style={{fontSize:30}}>주차된 차량</span><b  style={{fontSize:30}}>{park.TPKCT - (predictedRemain != null ? Math.round(predictedRemain) : 0)}</b></div>
+                            <div className="ep-stat2"><span  style={{fontSize:30}}>도착시 여석</span><b  style={{fontSize:30}}>{predictedRemain != null ? Math.round(predictedRemain) : "-"}</b></div>
                         </div>
 
                         {/* 도착시 혼잡도 게이지 (항상 노출) */}
@@ -267,14 +270,14 @@ export default function RouteCard({
                         <div className="ep-stat">
                             <b>
                           <span style={{ fontSize: "14px", color: "black" }}>
-                            <div>현재</div>
-                            <div>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div>
+                            <div  style={{fontSize:30}}>현재</div>
+                            <div  style={{fontSize:30}}>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div>
                           </span>
                             </b>
                         </div>
-                        <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
-                        <div className="ep-stat"><span>주차된 차량</span><b>{park.liveCnt ?? "-"}</b></div>
-                        <div className="ep-stat"><span>현재 여석</span><b>{expectedRemain}</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>총자리</span><b style={{fontSize:30}}>{park.TPKCT ?? "-"}</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>주차된 차량</span><b style={{fontSize:30}}>{park.liveCnt ?? "-"}</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>현재 여석</span><b style={{fontSize:30}}>{expectedRemain}</b></div>
                     </div>
                     {/* === [REPLACE-END] === */}
 
@@ -285,10 +288,10 @@ export default function RouteCard({
                     </div>
 
                     <div className="route-actions">
-                        <button className="btn btn-reserve" onClick={onReserve}>예약하기</button>
+                        <button className="btn btn-reserve" onClick={onReserve}  style={{fontSize:30,height:60}}>예약하기</button>
                         <button className="btn btn-start" onClick={()=>{ setGO(true); setMode("drive");
                             const position = new window.kakao.maps.LatLng(coordinates.lat,coordinates.lng);
-                            map.setCenter(position); }}>안내 시작</button>
+                            map.setCenter(position); }}  style={{fontSize:30,height:60}}>안내 시작</button>
                         <button className="btn btn-close" onClick={()=>{
                             setRouteInfo({});
                             setGO(false);
@@ -297,7 +300,7 @@ export default function RouteCard({
                                 window.currentRouteLine = null;
                             }
                             window.__routeLocked = false; // 잠금 해제
-                        }}>닫기</button>
+                        }}  style={{fontSize:30,height:60}}>닫기</button>
                     </div>
                 </>
             )}

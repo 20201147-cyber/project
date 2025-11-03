@@ -82,7 +82,9 @@ const ParkingSearch = () => {
                             <td>{park.PKLT_CD}</td>
                             <td>{park.PKLT_NM}</td>
                             <td>
-                                <button onClick={() => registerPark(park.PKLT_CD)}>등록</button>
+                                <button onClick={() => {
+                                    registerPark(park.PKLT_CD);
+                                }}>등록</button>
                             </td>
                         </tr>
                     ))}

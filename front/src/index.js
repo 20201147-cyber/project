@@ -9,19 +9,20 @@ import Main from "./components/Main";
 import MainMobile from "./components/MainMobile";
 import Dashboard from "./components/admins/Dashboard";
 import ParkingManage from "./components/admins/ParkingManage";
-import ReservationManage from "./components/admins/ReservationManage";
 import ParkingSearch from "./components/admins/ParkingSearch";
 import { Navigate } from "react-router-dom";
 import {ParkingProvider} from "./context/ParkingContext";
 import {MarkerProvider} from "./context/MarkerContext";
 import {RouteProvider} from "./context/RouteContext";
 import {CalculationProvider} from "./context/CalculationContext";
+import {MarkerProvider2} from "./context/MarkerContext2";
 
 
 // 라우팅 컴포넌트
 const App = () => (
     <ParkingProvider>
     <MarkerProvider>
+    <MarkerProvider2>
     <RouteProvider>
     <CalculationProvider>
         <BrowserRouter>
@@ -32,7 +33,6 @@ const App = () => (
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="parkingSearch" element={<ParkingSearch />} />
                 <Route path="parking" element={<ParkingManage />} />
-                <Route path="reservation" element={<ReservationManage />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/owner" element={<Owner />} />
@@ -41,6 +41,7 @@ const App = () => (
         </BrowserRouter>
     </CalculationProvider>
     </RouteProvider>
+    </MarkerProvider2>
     </MarkerProvider>
     </ParkingProvider>
 );

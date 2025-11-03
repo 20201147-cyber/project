@@ -1,0 +1,74 @@
+.parking-manage-container {
+    padding: 25px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f6f8;
+    color: #2c3e50;
+}
+
+h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1f3c88;
+    margin-bottom: 10px;
+}
+
+p {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.search-box {
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 200px;
+    margin-right: 10px;
+}
+
+.search-box button {
+    padding: 5px 15px;
+    border-radius: 5px;
+    border: none;
+    background-color: #1f3c88;
+    color: white;
+    cursor: pointer;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #d1d9e6;
+    border-radius: 10px;
+    padding: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.parking-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+}
+
+.parking-table th, .parking-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.parking-table th {
+    background-color: #1f3c88;
+    color: white;
+}
+
+.parking-table td button:hover {
+    opacity: 0.8;
+}
+.parking-table td .btn-group {
+    display: flex;
+    gap: 6px;           /* 버튼 사이 간격 */
+    float: right;       /* 오른쪽 붙이기 */
+}

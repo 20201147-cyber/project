@@ -1,6 +1,6 @@
 // DrivePanel.js
 import React, { useState, useEffect } from "react";
-import "../../css/DrivePanel.css";
+import "../../mobile_css/DriveMobile.css"
 // 거리 계산 함수 (Haversine 공식)
 const calculateDistance = (lat1, lng1, lat2, lng2) => {
     const R = 6371; // 지구 반경 (km)
@@ -15,38 +15,9 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
     return R * c; // km 단위
 };
 
-// 🔽 turnType → 레이블/아이콘(간단표시) 매핑
-const TURN = {
-    12: { label: "좌회전", icon: "↰" },
-    13: { label: "우회전", icon: "↱" },
-    14: { label: "U턴",   icon: "↶" },
-};
-
-export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, routeInfo, setRouteInfo, maneuvers }) {
+export default function DriveMobile({ map, go, setGO, coordinates, ParkingList, routeInfo, setRouteInfo }) {
     const [nearbyParking, setNearbyParking] = useState([]);
     const [originalDestination, setOriginalDestination] = useState(routeInfo?.destination ?? null);
-
-    // 회전 표시에 필요한 상태 추가
-    const [turnInstructions, setTurnInstructions] = useState([]); // [{type, lat, lon}]
-    const [turnIndex, setTurnIndex] = useState(0);
-    const [nextTurn, setNextTurn] = useState(null);
-
-    // 🔹 Main에서 넘어온 maneuvers를 내부 회전리스트로 반영
-    useEffect(() => {
-        if (Array.isArray(maneuvers) && maneuvers.length) {
-            const turns = maneuvers.map(m => ({
-                type: m.turnType,
-                lat:  m.lat,
-                lon:  m.lon,
-            }));
-            setTurnInstructions(turns);
-            setTurnIndex(0);
-            setNextTurn(turns[0] || null);
-        } else {
-            setTurnInstructions([]);
-            setNextTurn(null);
-        }
-    }, [maneuvers]);
 
     const [showModal, setShowModal] = useState(false);
     const [selectedPark, setSelectedPark] = useState(null);
@@ -86,7 +57,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             let pathPoints = [];
             let totalTime = "-";
             let totalDistance = "-";
-            const turns = []; // 🔽 회전 포인트 수집
 
             data.features.forEach((feature) => {
                 const props = feature.properties;
@@ -98,12 +68,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                     feature.geometry.coordinates.forEach(([lon, lat]) => {
                         pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
                     });
-                } else if (feature.geometry?.type === "Point") {
-                    const t = Number(props?.turnType);
-                    if ([12,13,14].includes(t)) {
-                        const [lon, lat] = feature.geometry.coordinates;
-                        turns.push({ type: t, lat, lon });
-                    }
                 }
             });
 
@@ -129,10 +93,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                 destination: park.PKLT_NM,
                 isParking: true
             });
-            // 🔽 회전 목록 초기화
-            setTurnInstructions(turns);
-            setTurnIndex(0);
-            setNextTurn(turns[0] || null);
 
             // 명시적 재탐색 후에도 자동 재탐색은 막아둠
             window.__routeLocked = true;
@@ -197,7 +157,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             let pathPoints = [];
             let totalTime = "-";
             let totalDistance = "-";
-            const turns = [];
 
             data.features.forEach((feature) => {
                 const props = feature.properties;
@@ -209,12 +168,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                     feature.geometry.coordinates.forEach(([lon, lat]) => {
                         pathPoints.push(new window.kakao.maps.LatLng(lat, lon));
                     });
-                } else if (feature.geometry?.type === "Point") {
-                    const t = Number(props?.turnType);
-                    if ([12,13,14].includes(t)) {
-                        const [lon, lat] = feature.geometry.coordinates;
-                        turns.push({ type: t, lat, lon });
-                    }
                 }
             });
 
@@ -232,9 +185,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
             const timeMin = totalTime !== "-" ? Math.round(totalTime / 60) : "-";
             const distKm = totalDistance !== "-" ? (totalDistance / 1000).toFixed(2) : "-";
             setRouteInfo({ distance: distKm, time: timeMin, destination: originalDestination });
-            setTurnInstructions(turns);
-            setTurnIndex(0);
-            setNextTurn(turns[0] || null);
         } catch (err) {
             console.error("원래 목적지 길찾기 실패:", err);
         }
@@ -274,23 +224,6 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [map]);
 
-    // 🔽 좌표가 바뀔 때, 다음 회전까지의 거리 보고 소진 처리
-    useEffect(() => {
-        if (!turnInstructions.length) { setNextTurn(null); return; }
-        const idx = Math.min(turnIndex, turnInstructions.length - 1);
-        const cur = turnInstructions[idx];
-        if (!cur) { setNextTurn(null); return; }
-        const dKm = calculateDistance(coordinates.lat, coordinates.lng, cur.lat, cur.lon);
-        // 35m 이내면 다음 회전으로 넘김
-        if (dKm < 0.035) {
-            const ni = Math.min(idx + 1, turnInstructions.length - 1);
-            setTurnIndex(ni);
-            setNextTurn(turnInstructions[ni] || null);
-        } else {
-            setNextTurn(cur);
-        }
-    }, [coordinates, turnInstructions, turnIndex]);
-
     // 가까운 주차장 5개 계산
     useEffect(() => {
         if (!ParkingList || ParkingList.length === 0) return;
@@ -311,12 +244,12 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
 
     return (
         <div>
-            <div className="section-title">주행 모드</div>
-            <div className="card">
-                <div className="subtle">현재 목적지</div>
+            <div className="section-title" style={{fontSize:30}}>주행 모드</div>
+            <div className="card" style={{fontSize:30}}>
+                <div className="subtle" style={{fontSize:30}}>현재 목적지</div>
                 <div style={{ marginTop: 6, fontWeight: 600 }}>{destinationName}</div>
             </div>
-            <button className="primary-btn-center" onClick={handleSafeDriveClick}>
+            <button className="primary-btn-center" onClick={handleSafeDriveClick} style={{fontSize:30}}>
                 {go ? "안심 주행 종료" : "안심 주행"}
             </button>
 
@@ -332,31 +265,32 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                         const pctText = status.pct ? `${status.pct}%` : "—";
 
                         return (
-                            <article key={index} className="ep-drive-card">
+                            <article key={index} className="ep-drive-card" >
                                 <header className="ep-drive-top">
-                                    <h4 className="ep-drive-title">{park.PKLT_NM ?? "이름없는 주차장"}</h4>
+                                    <h4 className="ep-drive-title" style={{fontSize:30}}>{park.PKLT_NM ?? "이름없는 주차장"}</h4>
                                     <button
                                         className="ep-drive-route-btn"
                                         onClick={() => {
                                             setSelectedPark(park);   // ✅ 선택한 주차장 저장
                                             setShowModal(true);       // ✅ 모달 띄우기
                                         }}
+                                        style={{fontSize:30}}
                                     >
                                         경로탐색
                                     </button>
                                 </header>
 
-                                <div className="ep-drive-badges">
-                                    <span className="badge blue">{distanceStr}</span>
-                                    <span className={`badge ${chargeClass}`}>{park.CHGD_FREE_NM ?? "-"}</span>
-                                    <span className={`badge ${status.variant}`}>{status.label}</span>
-                                    {park.PKLT_KND_NM && <span className="badge outline">{park.PKLT_KND_NM}</span>}
+                                <div className="ep-drive-badges" >
+                                    <span className="badge blue" style={{fontSize:30}}>{distanceStr}</span>
+                                    <span className={`badge ${chargeClass}`} style={{fontSize:30}}>{park.CHGD_FREE_NM ?? "-"}</span>
+                                    <span className={`badge ${status.variant}`} style={{fontSize:30}}>{status.label}</span>
+                                    {park.PKLT_KND_NM && <span className="badge outline" style={{fontSize:30}}>{park.PKLT_KND_NM}</span>}
                                 </div>
 
                                 <div className="ep-drive-stats">
-                                    <div className="ep-stat"><span>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
-                                    <div className="ep-stat"><span>현재</span><b>{park.liveCnt ?? "-"}</b></div>
-                                    <div className="ep-stat"><span>남음</span><b>{park.remainCnt ?? "-"}</b></div>
+                                    <div className="ep-stat"><span style={{fontSize:30}}>총자리</span><b>{park.TPKCT ?? "-"}</b></div>
+                                    <div className="ep-stat"><span style={{fontSize:30}}>현재</span><b>{park.liveCnt ?? "-"}</b></div>
+                                    <div className="ep-stat"><span style={{fontSize:30}}>남음</span><b>{park.remainCnt ?? "-"}</b></div>
                                 </div>
 
                                 <div className={`ep-meter ${status.variant}`}>
@@ -364,7 +298,7 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                                     <div className="cap">{pctText}</div>
                                 </div>
 
-                                <div className="ep-drive-meta">
+                                <div className="ep-drive-meta" style={{fontSize:20}}>
                                     <span>운영시간</span>
                                     <div>{fmtHM(park.WD_OPER_BGNG_TM)} - {fmtHM(park.WD_OPER_END_TM)}</div>
 
@@ -388,9 +322,10 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                     <div
                         className="modal3 modal3--compact"
                         onClick={(e) => e.stopPropagation()} // 박스 클릭 시 닫히지 않게
+                        style={{height:"250px",width:"500px"}}
                     >
-                        <h3>경로 안내</h3>
-                        <p>
+                        <h3 style={{fontSize:30}}>경로 안내</h3>
+                        <p style={{fontSize:30}}>
                             <b>{selectedPark.PKLT_NM}</b> 으로 안내하시겠습니까?
                         </p>
                         <div className="modal3-actions">
@@ -400,34 +335,19 @@ export default function DrivePanel({ map, go, setGO, coordinates, ParkingList, r
                                     handleRouteSearch(selectedPark);
                                     setShowModal(false);
                                 }}
+                                style={{fontSize:30,height:50}}
                             >
                                 예
                             </button>
                             <button
                                 className="no-btn"
                                 onClick={() => setShowModal(false)}
+                                style={{fontSize:30,height:50}}
                             >
                                 아니요
                             </button>
                         </div>
                     </div>
-                </div>
-            )}
-            {/* ✅ (5) 오버레이 출력: 모달 블록 바로 아래, 닫는 </div> 직전 */}
-            {go && nextTurn && TURN[nextTurn.type] && (
-                <div className="turn-hint">
-                    <span className="ic">{TURN[nextTurn.type].icon}</span>
-                    <span className="tx">
-                {TURN[nextTurn.type].label}
-                        <em>
-                    {(() => {
-                        const d = calculateDistance(
-                            coordinates.lat, coordinates.lng, nextTurn.lat, nextTurn.lon
-                        );
-                        return d < 1 ? ` ${Math.round(d * 1000)} m` : ` ${d.toFixed(1)} km`;
-                    })()}
-                </em>
-                </span>
                 </div>
             )}
         </div>

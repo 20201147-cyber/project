@@ -1,8 +1,8 @@
 // DestinationPanel.js
 
 import React, { useState } from "react";
-
-export default function DestinationPanel({ map, coordinates, setGO, setMode,routeInfo,setRouteInfo }) {
+import "../../mobile_css/DestinationMobile.css"
+export default function DestinationMobile({ map, coordinates, setGO, setMode,routeInfo,setRouteInfo }) {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [selectedRoute, setSelectedRoute] = useState(null); // 독자적 경로 정보
@@ -126,31 +126,26 @@ export default function DestinationPanel({ map, coordinates, setGO, setMode,rout
 
     return (
         <div>
-            <div className="section-title">목적지 탐색</div>
-
-            <div className="search-row">
-                <div className="input-wrap">
-                    <input
-                        className="input"
-                        placeholder="검색어 입력"
-                        value={searchKeyword}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
-                    />
-                </div>
-
-                <button className="primary-btn" onClick={searchTmapPOI}>
-                    검색
-                </button>
+            <div className="section-title section-title2">목적지 탐색</div>
+            <div className="input-wrap input-wrap2">
+                <input
+                    className="input input2"
+                    placeholder="검색어 입력"
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
             </div>
-
+            <button className="primary-btn" style={{ flex: 1, marginTop: 8,fontSize:30 }} onClick={searchTmapPOI}>
+                검색
+            </button>
             <hr />
 
             {/* 검색 결과 */}
             {searchResults.length > 0 && (
                 <div style={{ marginTop: 12, backgroundColor: "white", borderRadius: 8, maxHeight: "400px", overflowY: "auto", border: "1px solid #eee" }}>
-                    <div style={{padding: "12px 8px", borderBottom: "1px solid #eee",color:"black",fontSize:18,fontWeight:"bold"}}>검색 결과  {searchResults.length}개</div>
+                    <div style={{padding: "12px 8px", borderBottom: "1px solid #eee",color:"black",fontSize:30,fontWeight:"bold"}}>검색 결과  {searchResults.length}개</div>
                     {searchResults.map((poi, idx) => (
-                        <div key={idx} style={{ padding: "12px 8px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", whiteSpace: "nowrap", height:"80px", transition: "background-color 0.2s",color:"black" }}
+                        <div key={idx} style={{ padding: "12px 8px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", whiteSpace: "nowrap", height:"80px", transition: "background-color 0.2s",color:"black",fontSize:30 }}
                              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
                              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "white")}
                         >
@@ -159,7 +154,7 @@ export default function DestinationPanel({ map, coordinates, setGO, setMode,rout
                             </div>
                             <button
                                 className="primary-btn"
-                                style={{ marginLeft: 8, fontSize: 12, flexShrink: 0, padding: "4px 8px", height: "30px" }}
+                                style={{ marginLeft: 8, fontSize: 30, flexShrink: 0, padding: "4px 8px", height: "60px",width:"90px" }}
                                 onClick={() => handleRouteSearch(poi)}
                             >
                                 탐색
@@ -173,15 +168,15 @@ export default function DestinationPanel({ map, coordinates, setGO, setMode,rout
             {selectedRoute && (
                 <div style={{ marginTop: 12, padding: 12, backgroundColor: "#fafafa", borderRadius: 8, border: "1px solid #eee" }}>
                     <div className="ep-drive-stats" style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                        <div className="ep-stat"><span>거리</span><b>{selectedRoute.distanceStr} km</b></div>
-                        <div className="ep-stat"><span>소요시간</span><b>{selectedRoute.timeMin} 분</b></div>
-                        <div className="ep-stat"><span>도착시간</span><b>{selectedRoute.eta}</b></div>
+                        <div className="ep-stat" ><span style={{fontSize:30}}>거리</span><b style={{fontSize:30}}>{selectedRoute.distanceStr} km</b></div>
+                        <div className="ep-stat"><span style={{fontSize:30}}>소요시간</span><b style={{fontSize:30}}>{selectedRoute.timeMin} 분</b></div>
+                        <div className="ep-stat"><span style={{fontSize:30}}>도착시간</span><b style={{fontSize:30}}>{selectedRoute.eta}</b></div>
                     </div>
                     <hr />
-                    <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "nowrap" }}>
+                    <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "nowrap",fontSize:30 }}>
                         <button
                             className="btn btn-start"
-                            style={{ flex: 1, minWidth: 0 }}
+                            style={{ flex: 1, minWidth: 0 ,fontSize:30}}
                             onClick={() => {
                                 setGO(true);
                                 setMode("drive");
@@ -199,7 +194,7 @@ export default function DestinationPanel({ map, coordinates, setGO, setMode,rout
                         </button>
                         <button
                             className="btn btn-close"
-                            style={{ flex: 1, minWidth: 0 }}
+                            style={{ flex: 1, minWidth: 0 ,fontSize:30}}
                             onClick={() => {
                                 if (window.currentRouteLine) {
                                     window.currentRouteLine.setMap(null);

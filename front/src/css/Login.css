@@ -1,6 +1,5 @@
-/* =========================
-   2열 레이아웃 컨테이너
-   ========================= */
+/*Login.css*/
+
 .login-2col {
     display: flex;
     align-items: center;
@@ -166,15 +165,6 @@
     .login-2col { gap: 32px; }
     .login-right { flex-basis: 380px; }
 }
-@media (max-width: 768px) {
-    .login-2col {
-        flex-direction: column;
-        justify-content: flex-start;
-        padding-top: 32px;
-    }
-    .login-left { order: -1; } /* 이미지 위, 폼 아래 순서 바꾸고 싶으면 제거 */
-    .login-visual { max-width: 420px; border-radius: 16px; }
-}
 
 /* ===== 왼쪽 3장 이미지 스택 ===== */
 .photo-stack {
@@ -208,19 +198,15 @@
 
 /* 반응형 */
 @media (max-width: 992px) {
-    .photo-stack { width: min(440px, 80vw); }
+    .photo-stack { 
+      width: min(440px, 80vw);
+    }
     .stack-card { width: 66%; }
-    .stack-card.c1 { left: 4%;  top: 10%; transform: rotate(-8deg); }
-    .stack-card.c2 { left: 26%; top: 2%; }
-    .stack-card.c3 { left: 50%; top: 14%; transform: rotate(8deg); }
+    .stack-card.c1 { left: 0%;  top: 10%; transform: rotate(-8deg); }
+    .stack-card.c2 { left: 20%; top: 2%; }
+    .stack-card.c3 { left: 40%; top: 14%; transform: rotate(8deg); }
 }
-@media (max-width: 768px) {
-    .photo-stack { width: min(420px, 92vw); }
-    .stack-card { width: 70%; }
-    .stack-card.c1 { left: 6%;  top: 8%;  transform: rotate(-6deg); }
-    .stack-card.c2 { left: 20%; top: 0%; }
-    .stack-card.c3 { left: 42%; top: 12%; transform: rotate(6deg); }
-}
+
 /* =========================
    모달 시각 문제 수정
    ========================= */
@@ -322,4 +308,52 @@
 .login-modal-content {
     position: relative;
     z-index: 1060 !important;
+}
+
+/* ===== 모바일 최우선 오버라이드 (맨 마지막) ===== */
+@media screen and (max-width: 1024px) {
+  .login-2col {
+    flex-direction: column;
+    justify-content: flex-start;   /* 위에서부터 쌓기 */
+    align-items: center;
+    gap: 8px;
+    padding: 16px 8px 0;           /* ⬅ 아래 패딩 8px -> 0 */
+    background: #f6f6f6;
+    min-height: auto;              /* ⬅ 100dvh 강제 높이 제거 */
+  }
+
+  /* 카드 + 폼 폭 통일 */
+  .login-left,
+  .login-right,
+  .photo-stack,
+  .login-page form {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .login-page h1 {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    font-size: 34px;
+    text-align: center;
+  }
+
+  .login-page form {
+    padding: 18px 14px 12px;      /* ⬅ 폼 아래 패딩도 살짝 줄이기 */
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    margin-bottom: 0;             /* ⬅ 혹시 모를 바닥 margin 제거 */
+  }
+
+  .login-page input {
+    padding: 12px 10px;
+    font-size: 16px;
+  }
+
+  .login-page button[type="submit"],
+  .login-page button[type="button"] {
+    padding: 12px 10px;
+    font-size: 16px;
+  }
 }

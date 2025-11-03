@@ -1,275 +1,351 @@
-/* FavoritesPanel.css — Ezpark 예약 내역 폴리시 */
-
-:root{
-  --ease-out: cubic-bezier(.16,1,.3,1);
-  --dur-1: 120ms;
-  --dur-2: 200ms;
-  --radius: 14px;
-  --shadow-1: 0 1px 3px rgba(0,0,0,.06);
-  --shadow-2: 0 6px 18px rgba(0,0,0,.12);
+/* FavoritesPanel.css */
+.res-list {
+    display: grid;
+    gap: 12px;
 }
-
-/* 현재 시각 표시 */
-.res-nowtime{
-  font-size: 28px;
-  color: #111827;
-  padding-left: 6px;
-  margin: 0 0 8px;
-  letter-spacing: .2px;
-}
-.res-nowtime .muted{ font-size: 14px; color: var(--muted); margin-left: 6px; }
-
-/* 리스트 */
-.res-list{ display:grid; gap: 12px; }
 
 /* 카드 */
-.res-card{
-  background:#fff;
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  border:1px solid rgba(17,24,39,.06);
-  box-shadow: 0 6px 20px rgba(17,24,39,.08);
-  transition: transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+.res-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 20px rgba(17, 24, 39, 0.08);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
 }
-.res-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: rgba(56,151,240,.35); }
-.res-card.is-done{ opacity:.85; }
+.res-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(17, 24, 39, 0.12);
+    border-color: rgba(56, 151, 240, 0.35);
+}
 
 /* 헤더 */
-.res-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
-.res-title{ font-weight:800; font-size:16px; line-height:1.1; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.res-badges{ display:flex; align-items:center; gap:8px; }
+.res-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.res-title {
+    font-weight: 800;
+    font-size: 16px;
+    line-height: 1.1;
+    color: #0f172a; /* slate-900 */
+}
 
-/* 상태칩 */
-.res-chip{
-  display:inline-flex; align-items:center; justify-content:center;
-  height:26px; padding:0 10px; border-radius:999px; font-weight:800; font-size:12px;
-  border:1px solid #e5e7eb; background:#f9fafb; color:#374151;
+/* 배지 */
+.res-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid;
+    background: #f8fafc;
+    width:80px;
 }
-.chip-wait{ background:#eff6ff; border-color:#dbeafe; color:#2563eb; }
-.chip-soon{ background:#fff7ed; border-color:#ffedd5; color:#b45309; }
-.chip-done{ background:#f1f5f9; border-color:#e2e8f0; color:#64748b; }
-
-/* 이용권 배지 */
-.res-badge{
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  border: 1px solid;
-  background: #f8fafc;
-  width:80px; text-align:center;
+.res-badge.day {
+    color: #2563eb;           /* blue-600 */
+    border-color: rgba(37,99,235,.25);
+    background: rgba(37,99,235,.06);
 }
-.res-badge.day{
-  color: #2563eb; border-color: rgba(37,99,235,.25); background: rgba(37,99,235,.06);
-}
-.res-badge.hour{
-  color: #7c3aed; border-color: rgba(124,58,237,.25); background: rgba(124,58,237,.06);
+.res-badge.hour {
+    color: #7c3aed;           /* violet-600 */
+    border-color: rgba(124,58,237,.25);
+    background: rgba(124,58,237,.06);
 }
 
 /* 본문 그리드 */
-.res-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top: 2px; }
-.res-cell{ background:#f8fafc; border:1px solid rgba(15,23,42,.06); border-radius:10px; padding:10px 12px; }
-.res-cell.full-width{ grid-column: 1 / -1; }
-
-.res-label{ font-size:12px; color:#6b7280; }
-.res-value{ margin-top:4px; font-weight:800; font-size:14px; letter-spacing:.2px; color:#111827; }
-.res-value.res-left--soon{ color:#b45309; }
-.res-value.res-left--wait{ color:#111827; }
-.res-value.res-left--done{ color:#64748b; }
-
-/* === 진행 게이지 (예약까지) : 60분 스케일, 30/15분 눈금 === */
-.res-value.res-left{ margin-bottom: 6px; }
-
-.res-progress{
-  position: relative;
-  height: 10px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: #eef2f7;
-  border: 1px solid #e5e7eb;
-  margin-top: 4px;
+.res-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 2px;
 }
-.res-progress .fill{
-  height: 100%;
-  width: 0;
-  transition: width .25s var(--ease-out);
+.res-cell {
+    background: #f8fafc;
+    border: 1px solid rgba(15,23,42,.06);
+    border-radius: 10px;
+    padding: 10px 12px;
 }
-
-/* 색상 맵핑 */
-.res-progress.green .fill{ background:#22c55e; }  /* 30m 초과  → 여유(녹) */
-.res-progress.amber .fill{ background:#f59e0b; }  /* 15~30m     → 임박(주) */
-.res-progress.red   .fill{ background:#ef4444; }  /* 0~15m       → 긴급(빨) */
-.res-progress.gray  .fill{ background:#9ca3af; }  /* 0 이하       → 완료(회) */
-
-/* 눈금(30m/15m) */
-.res-progress .tick{
-  position:absolute; top:-12px; width:2px; height:12px; background:#cbd5e1;
+.res-label {
+    font-size: 12px;
+    color: #6b7280; /* gray-500 */
 }
-.res-progress .tick span{
-  position:absolute; top:-16px; left:50%; transform:translateX(-50%);
-  font-size:11px; color:#94a3b8;
+.res-value {
+    margin-top: 4px;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .2px;
+    color: #111827; /* gray-900 */
 }
-.res-progress .tick-30{ left:50%; }
-.res-progress .tick-15{ left:25%; }
-
-/* 금액 */
-.res-amount{ font-size:13.5px; }
-
-/* 상단 메타(상태칩 + ETA) */
-.res-progress-info{
-  display:flex; align-items:center; justify-content:space-between;
-  margin-top:6px; font-size:12px; color:#6b7280;
-}
-.res-progress-info .mini-chip{
-  display:inline-flex; align-items:center; height:22px; padding:0 8px;
-  border-radius:999px; font-weight:800; border:1px solid #e5e7eb; background:#f9fafb; color:#374151;
-}
-.res-progress-info .mini-chip.wait{ background:#eff6ff; border-color:#dbeafe; color:#2563eb; }
-.res-progress-info .mini-chip.soon{ background:#fff7ed; border-color:#ffedd5; color:#b45309; }
-.res-progress-info .mini-chip.done{ background:#f1f5f9; border-color:#e2e8f0; color:#64748b; }
-
-/* === 액션 버튼: 한 줄·동일 폭·자동 폰트 축소 === */
-.res-actions-row{
-  grid-column: 1 / -1;
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;   /* 한 줄 고정 */
-  margin-top: 2px;
-}
-.res-actions-row > button{
-  flex: 1 1 0;         /* 동일 폭 */
-  min-width: 0;
-  height: 42px;        /* 통일 높이 */
-  border-radius: 12px;
-
-  /* 줄바꿈 금지 + 한글 단어 단위 */
-  white-space: nowrap;
-  word-break: keep-all;
-
-  /* 컨테이너 쿼리 기반 자동 폰트 축소 */
-  container-type: inline-size;                  /* 버튼 자신을 컨테이너로 */
-  font-size: clamp(10px, 12cqw, 14px);         /* 좁으면 10px까지 자동 축소 */
+.res-amount {
+    font-size: 13.5px;
+    color: #111827;
 }
 
-/* 컨테이너 쿼리 미지원 브라우저 폴백 */
-@supports not (container-type: inline-size){
-  .res-actions-row > button{
-    font-size: clamp(10px, 2.5vw, 14px);       /* 대략적 축소(뷰포트 기준) */
-  }
+/* 보조 정보 */
+.res-meta {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #6b7280;
 }
 
-button.btn-primary--sm,
-button.btn-cancel--sm,
-button.btn-blue{
-  transition: background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
+/* 다크모드(선택적) */
+@media (prefers-color-scheme: dark) {
+    .res-card { background:#0b0f17; border-color:rgba(255,255,255,.06); box-shadow:none; }
+    .res-title, .res-value { color:#e5e7eb; }
+    .res-cell { background:#0f172a; border-color:rgba(255,255,255,.05); }
+    .res-label, .res-meta { color:#94a3b8; }
+    .res-badge { background:rgba(255,255,255,.03); }
 }
 
-/* Primary (경로 안내) */
-.btn-primary--sm{
-  background: linear-gradient(135deg, var(--ink), #60a5fa);
-  color:#fff; border:1px solid var(--ink);
-  font-weight:800; font-size:14px; border-radius:12px; padding:10px 14px;
-  box-shadow: 0 6px 16px rgba(56,151,240,.25);
+/* ===== 액션 영역 & 취소 버튼 ===== */
+.res-actions{
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
 }
-.btn-primary--sm:hover{ filter:brightness(1.03); transform:translateY(-1px); box-shadow: 0 10px 24px rgba(56,151,240,.28); }
-.btn-primary--sm:active{ transform: translateY(0); }
 
-/* Secondary (추천) — 파랑 아웃라인 */
-.btn-blue{
-  border:1px solid var(--ink); background:#fff; color: var(--ink);
-  font-weight:800; font-size:14px; border-radius:12px; padding:10px 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
-}
-.btn-blue:hover{ background: color-mix(in srgb, var(--ink), white 90%); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(56,151,240,.18); }
-.btn-blue:active{ transform: translateY(0); }
-
-/* Danger (취소) */
 .btn-cancel{
-  appearance:none; border:1px solid #ef4444; background:#fff; color:#ef4444;
-  font-weight:800; font-size:14px; border-radius:12px; padding:10px 14px;
-  box-shadow:0 2px 8px rgba(239,68,68,.08);
+    appearance: none;
+    border: 1px solid #ef4444;
+    background: #fff;
+    color: #ef4444;
+    font-weight: 800;
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    transition: transform .05s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
 }
-.btn-cancel--sm{ /* 높이/폰트는 위 공통에서 통일됨 */ }
-.btn-cancel:hover:not([disabled]){ background:#fef2f2; transform: translateY(-1px); box-shadow:0 10px 20px rgba(239,68,68,.18); }
-.btn-cancel:active:not([disabled]){ transform: translateY(0); }
-.btn-cancel[disabled]{ opacity:.6; cursor:not-allowed; border-color:#e5e7eb; color:#9ca3af; }
-
-/* 주변 추천 섹션 */
-.nearby-list{ display:grid; gap:12px; margin:8px 0; }
-.nearby-card{
-  background:#fff; border-radius: var(--radius); padding:14px 16px;
-  border:1px solid rgba(17,24,39,.06); box-shadow: 0 6px 20px rgba(17,24,39,.08);
-  transition: transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+.btn-cancel:hover:not([disabled]){
+    background: #fef2f2;
+    box-shadow: 0 8px 20px rgba(239,68,68,.15);
 }
-.nearby-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: rgba(37,99,235,.35); }
-.nearby-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.nearby-title{ font-weight:800; font-size:16px; color:#0f172a; }
-.nearby-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:8px; margin-top:4px; }
-.nearby-cell{ background:#f8fafc; border:1px solid rgba(15,23,42,.06); border-radius:10px; padding:10px 12px; font-size:14px; font-weight:600; color:#111827; }
-
-.btn-path{
-  display:block; width:100%; text-align:center; margin-top:10px; padding:8px 0;
-  font-size:14px; font-weight:700; border-radius:10px; border:1px solid #f59e0b; background:#fff7ed; color:#b45309; transition: all .15s var(--ease-out);
+.btn-cancel:active:not([disabled]){
+    transform: translateY(1px);
 }
-.btn-path:hover{ background:#ffedd5; box-shadow:0 6px 20px rgba(245,158,11,.15); transform: translateY(-1px); }
-.btn-path:active{ transform: translateY(0); }
-
-.btn-close-nearby{
-  display:inline-block; margin-bottom:10px; padding:4px 8px; font-size:12px; border-radius:8px;
-  border:1px solid #ef4444; background:#fff; color:#ef4444; font-weight:700;
+.btn-cancel[disabled]{
+    opacity:.6;
+    cursor:not-allowed;
+    border-color:#e5e7eb;
+    color:#9ca3af;
 }
-.btn-close-nearby:hover{ background:#fef2f2; }
-
-/* 지도 오버레이(추천) */
-.recommend-overlay{
-  background:#fff; border:2px solid #007bff; border-radius:10px; padding:10px 16px;
-  font-size:15px; font-weight:700; color:#000; box-shadow: 2px 3px 6px rgba(0,0,0,.3);
-  text-align:center; height: 40px; display:flex; align-items:center; justify-content:center;
-}
-.recommend-overlay.main-overlay{ background:#1e90ff; color:#fff; font-size:14px; padding:8px 12px; border:2px solid #005ecb; box-shadow:2px 4px 8px rgba(0,0,0,.4); }
-
-/* Empty state */
-.empty-wrap{ display:grid; }
-.empty-card{
-  background:#fff; border:1px dashed #e5e7eb; border-radius:12px; padding:18px; text-align:center; color:#374151;
-}
-.empty-ico{ font-size:28px; }
-.empty-title{ font-weight:800; margin-top:8px; }
-.empty-sub{ font-size:13px; color:#6b7280; margin-top:4px; }
-
-/* Skeleton */
-.skeleton-list{ display:grid; gap:12px; }
-.skel-card{ background:#fff; border:1px solid rgba(17,24,39,.06); border-radius:12px; padding:14px 16px; }
-.skel{ background: linear-gradient(90deg, #eef1f5 25%, #f5f7fa 37%, #eef1f5 63%); background-size: 400% 100%; animation: shimmer 1.2s infinite; border-radius:8px; }
-.skel-title{ height:16px; width:50%; margin-bottom:10px; }
-.skel-line{ height:12px; width:100%; margin-top:6px; }
-
-@keyframes shimmer{
-  0%{ background-position: 100% 0; }
-  100%{ background-position: 0 0; }
+/* 하단 한 줄 정렬: 예약일시 + 취소버튼 */
+.res-meta-row{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-/* 다크 모드 */
-@media (prefers-color-scheme: dark){
-  .res-card, .nearby-card, .empty-card, .skel-card{ background:#0b0f17; border-color: rgba(255,255,255,.06); box-shadow:none; }
-  .res-title, .nearby-title, .res-value, .empty-title{ color:#e5e7eb; }
-  .res-cell, .nearby-cell{ background:#0f172a; border-color: rgba(255,255,255,.05); }
-  .res-label, .empty-sub{ color:#94a3b8; }
-  .res-chip{ background:#0f172a; border-color:#1f2937; color:#cbd5e1; }
-  .btn-path{ background:#1c1c1c; border-color:#b45309; color:#fbbf24; }
+/* 기존 버튼보다 작게 */
+.btn-cancel{
+    appearance: none;
+    border: 1px solid #ef4444;
+    background: #fff;
+    color: #ef4444;
+    font-weight: 800;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    transition: transform .05s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
 }
 
-/* 키보드 포커스 */
-button:focus-visible, .btn-path:focus-visible, .btn-close-nearby:focus-visible{
-  outline:none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink), transparent 70%), 0 0 0 1px var(--ink) inset;
-  border-radius:10px;
+.btn-cancel--sm{
+    padding: 6px 10px;     /* ↓ 더 작게 */
+    font-size: 12px;       /* ↓ 더 작게 */
+    border-radius: 8px;
 }
 
-/* 가운데: 주차장 추천 버튼 텍스트 중앙 정렬 */
-.res-actions-row .btn-blue{
-  display: inline-flex;          /* 수직/수평 중앙을 위해 */
-  justify-content: center;       /* 가로 중앙 */
-  align-items: center;           /* 세로 중앙 */
-  text-align: center;            /* 텍스트 중앙 */
+.btn-cancel:hover:not([disabled]){
+    background: #fef2f2;
+    box-shadow: 0 8px 20px rgba(239,68,68,.15);
+}
+.btn-cancel:active:not([disabled]){ transform: translateY(1px); }
+.btn-cancel[disabled]{ opacity: .6; cursor: not-allowed; border-color:#e5e7eb; color:#9ca3af; }
+/* 남은시간을 가로로 한 줄 차지 */
+.res-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 기본 3등분 */
+    gap: 10px;
+}
+
+/* 남은시간만 전체 가로 차지 */
+.res-cell.full-width {
+    grid-column: 1 / -1; /* 그리드 전체 열 차지 */
+}
+.btn-blue {
+    border-color: #007bff;
+    background: #fff;
+    color: #007bff;
+}
+.btn-blue:hover:not([disabled]) {
+    background: #e0f0ff;
+    box-shadow: 0 8px 20px rgba(0,123,255,.15);
+}
+
+/* 공통 disabled 스타일 */
+.btn-cancel[disabled],
+.btn-blue[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+    color: #9ca3af;
+}
+/* ===== 주변 주차장 찾기 전용 ===== */
+.nearby-list {
+    display: grid;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+/* 주변 주차장 카드 */
+.nearby-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 20px rgba(17, 24, 39, 0.08);
+    border: 1px solid rgba(17, 24, 39, 0.06);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.nearby-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(17, 24, 39, 0.12);
+    border-color: rgba(37, 99, 235, 0.35);
+}
+
+/* 카드 헤더 */
+.nearby-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.nearby-title {
+    font-weight: 800;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+/* 카드 본문 */
+.nearby-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+.nearby-cell {
+    background: #f8fafc;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* 경로 탐색 버튼 */
+.ep-overlay__btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+    padding: 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    color: white;
+    transition: all 0.15s ease;
+}
+.btn-path:hover:not([disabled]) {
+    background: #ffedd5;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.15);
+}
+.btn-path:active:not([disabled]) {
+    transform: translateY(1px);
+}
+
+/* 닫기 버튼 */
+.btn-close-nearby {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid #ef4444;
+    background: #fff;
+    color: #ef4444;
+    font-weight: 700;
+}
+.btn-close-nearby:hover {
+    background: #fef2f2;
+}
+
+/* 다크모드 */
+@media (prefers-color-scheme: dark) {
+    .nearby-card { background:#0b0f17; border-color:rgba(255,255,255,.06); box-shadow:none; }
+    .nearby-title, .nearby-cell { color:#e5e7eb; }
+    .btn-path { background:#1c1c1c; border-color:#b45309; color:#fbbf24; }
+}
+.reserved-card {
+    border: 2px solid #f59e0b; /* 주황색 강조 */
+    background: #fff7ed;
+}
+
+.reserved-badge {
+    color: #b45309;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #ffedd5;
+    margin-left: 8px;
+}
+.recommend-overlay {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 16px; /* ← 내부 여백 커지면 높이 증가 */
+    font-size: 15px;
+    font-weight: bold;
+    color: #000;
+    box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    height: 25px; /* ← 원하는 높이로 조절 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.recommend-overlay.main-overlay {
+    background: #1e90ff;
+    color: white;
+    font-size: 14px;
+    padding: 10px 16px;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.4);
+}
+/* ✅ 여석 비율 바 스타일 */
+.progress-container {
+    position: relative;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    height: 14px;
+    margin: 8px 0 6px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.5s ease;
+    border-radius: 10px 0 0 10px;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    color: #000;
+    font-weight: bold;
 }

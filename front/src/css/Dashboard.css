@@ -1,0 +1,161 @@
+/* 전체 컨테이너 */
+.reservation-container {
+    padding: 25px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f6f8;
+    color: #2c3e50;
+}
+
+/* 타이틀 */
+.title {
+    margin-bottom: 20px;
+    font-size: 26px;
+    font-weight: bold;
+    color: #1f3c88;
+}
+
+/* 예약 없을 때 메시지 */
+.no-reservation {
+    color: #888;
+    font-style: italic;
+    font-size: 16px;
+}
+
+/* 테이블 컨테이너 (스크롤 가능) */
+.table-container {
+    max-height: 900px; /* 테이블 높이 제한 */
+    min-height: 400px; /* 너무 작게 표시되지 않도록 */
+    overflow-y: auto;   /* 세로 스크롤 */
+    overflow-x: auto;   /* 가로 스크롤 */
+    border: 1px solid #d1d9e6;
+    border-radius: 10px;
+    padding: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* 테이블 */
+.reservation-table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 700px;
+    table-layout: fixed; /* 균등 너비 */
+}
+
+/* 테이블 행 높이 */
+.reservation-table tr {
+    height: 50px; /* 각 셀 높이 */
+}
+
+/* 헤더 */
+.reservation-table th {
+    background-color: #1f3c88;
+    color: #fff;
+    font-weight: bold;
+    padding: 12px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 16px;
+}
+
+/* 사용자 첫 열 (y축) */
+.reservation-table td:first-child {
+    background-color: #f0f4f8;
+    font-weight: bold;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 120px;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* 시간 셀 */
+.time-cell {
+    font-weight: bold;
+    background-color: #f7f9fc;
+}
+
+/* 예약된 칸 */
+.reserved {
+    background-color: #4da6ff; /* 파란색 */
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    line-height: 50px; /* tr 높이와 맞춤 */
+    transition: all 0.2s ease-in-out;
+}
+
+/* 예약 안 된 칸 */
+.empty {
+    background-color: #fdfdfd;
+}
+
+/* 마우스 오버 효과 */
+.reservation-table td:hover {
+    transform: scale(1.05);
+    transition: transform 0.1s ease-in-out;
+    cursor: pointer;
+}
+
+/* 스크롤바 커스텀 (Chrome, Edge, Safari) */
+.table-container::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background-color: #b0b8c1;
+    border-radius: 5px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background-color: #f1f3f6;
+    border-radius: 5px;
+}
+
+/* 반응형: 작은 화면에서 스크롤 가능 */
+@media (max-width: 900px) {
+    .reservation-table {
+        min-width: 600px;
+    }
+    .reservation-table td:first-child {
+        width: 100px;
+    }
+}
+/* 주차장 정보 영역 */
+.park-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2열 그리드 */
+    gap: 20px; /* 셀 간 간격 */
+    padding: 20px;
+    background-color: #ffffff; /* 테이블과 동일한 배경색 */
+    border: 1px solid #d1d9e6; /* 테이블 테두리와 통일 */
+    border-radius: 10px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05); /* 약간의 그림자 */
+}
+
+/* 각 정보 카드 */
+.park-info div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f7f9fc; /* 테이블 헤더와 톤 맞춤 */
+    border: 1px solid #d1d9e6;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #2c3e50;
+    text-align: center;
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* 마우스 오버 시 살짝 강조 효과 */
+.park-info div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}

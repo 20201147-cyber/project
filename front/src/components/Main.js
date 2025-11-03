@@ -12,6 +12,7 @@ import RouteCard from "./panels/RouteCard";
 import { ParkingContext } from "../context/ParkingContext";
 import {useContext} from "react";
 import {MarkerContext} from "../context/MarkerContext";
+
 import {RouteContext} from "../context/RouteContext";
 import {CalculationContext} from "../context/CalculationContext";
 
@@ -43,7 +44,7 @@ export default function Main() {
   const [showArriveModal, setShowArriveModal] = useState(false);
   const [predictedRemain, setPredictedRemain] = useState(null);
   //컨텍스트 사용
-  const {visibleOnly, setVisibleOnly} = useContext(ParkingContext);
+  const {visibleOnly,setVisibleOnly,nearbyList,setNearbyList,nearbyOverlays,setNearbyOverlays} = useContext(ParkingContext);
   const {buildMarkerImage,buildOverlayHTML}=useContext(MarkerContext);
   const {calcDistanceMeters,clearRoutePath,drawRoutePath,clearRouteLine,TurnBanner,TURN_MAP,formatMeters,extractManeuvers}=useContext(RouteContext);
   const {pad2,toDateFromHHMM,addMinutesHHMM,roundToNextHourHH,HOURS_24,calcTicketPrice,TICKETS}=useContext(CalculationContext);
@@ -51,6 +52,16 @@ export default function Main() {
   // 도착지명/ETA/예상 여석(가능하면)
   const destName = routeInfo?.destination || null;
   const timeMin = routeInfo?.time ?? routeInfo?.timeMin;
+  //컨텍스트에서 공유하는 모드변경
+  useEffect(() => {
+    if (mode === "destination" || mode === "drive") {
+      setNearbyOverlays(prev => {
+        prev.forEach((ov) => ov.setMap(null));
+        return [];
+      });
+      setNearbyList(null);
+    }
+  }, [mode]);
   //파이썬 회귀분석
   useEffect(() => {
     if (!routeInfo?.destination || !visibleOnly?.length) return;
@@ -64,7 +75,7 @@ export default function Main() {
     const minutesAhead = routeInfo.time ?? routeInfo.timeMin;
     if (minutesAhead == null) return;
 
-    fetch("http://localhost:5000/ml/predict_remain", {
+    fetch("/ml/predict_remain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -88,7 +99,7 @@ export default function Main() {
         .catch(err => console.error(err));
 
   };
-   useEffect(() => {
+  useEffect(() => {
     if (go && window.currentRouteLine) window.__routeLocked = true; // 고정
     if (!go) window.__routeLocked = false;                          // 해제
   }, [go]);
@@ -173,20 +184,20 @@ export default function Main() {
   }, [coordinates, go, routeInfo, parkingList, map]);
 
   useEffect(() => {
-   if (!go || !maneuvers?.length) { setNextTurn(null); return; }
+    if (!go || !maneuvers?.length) { setNextTurn(null); return; }
 
-   const { lat: curLat, lng: curLng } = coordinates;
-   let best = null;     // 30km 이내에서 가장 가까운 지점
-   let nearest = null;  // 범위 밖이면 전체 중 최단 지점 fallback
+    const { lat: curLat, lng: curLng } = coordinates;
+    let best = null;     // 30km 이내에서 가장 가까운 지점
+    let nearest = null;  // 범위 밖이면 전체 중 최단 지점 fallback
 
-   for (const m of maneuvers) {
-     const d = calcDistanceMeters(curLat, curLng, m.lat, m.lon);
-     if (!nearest || d < nearest.distM) nearest = { turnType: m.turnType, distM: d };
-     if (d <= 30000) { // 30km 허들
-       if (!best || d < best.distM) best = { turnType: m.turnType, distM: d };
-     }
-   }
-   setNextTurn(best || nearest);
+    for (const m of maneuvers) {
+      const d = calcDistanceMeters(curLat, curLng, m.lat, m.lon);
+      if (!nearest || d < nearest.distM) nearest = { turnType: m.turnType, distM: d };
+      if (d <= 30000) { // 30km 허들
+        if (!best || d < best.distM) best = { turnType: m.turnType, distM: d };
+      }
+    }
+    setNextTurn(best || nearest);
   }, [coordinates, go, maneuvers]);
 
   // 지도 중심을 기준으로 재탐색
@@ -194,28 +205,28 @@ export default function Main() {
     if (!map || !routeInfo?.destination) return;
     const c = map.getCenter();
     if (routeInfo.isParking) {
-    await doRoute(c.getLat(), c.getLng(), routeInfo.destination);
-    window.__routeLocked = true; // 재탐색 후에도 고정 유지
-  } else {
-    // 비주차장: 저장된 좌표로 직접 재탐색
-    const data = await callTmapRoute({
-      startX: c.getLng(),
-      startY: c.getLat(),
-      endX: routeInfo.destLng,
-      endY: routeInfo.destLat,
-    });
-    if (!data) return;
-    // ⬇️ 회전 지점 추출(비주차장도 동일 포맷)
-    setManeuvers(extractManeuvers(data));
+      await doRoute(c.getLat(), c.getLng(), routeInfo.destination);
+      window.__routeLocked = true; // 재탐색 후에도 고정 유지
+    } else {
+      // 비주차장: 저장된 좌표로 직접 재탐색
+      const data = await callTmapRoute({
+        startX: c.getLng(),
+        startY: c.getLat(),
+        endX: routeInfo.destLng,
+        endY: routeInfo.destLat,
+      });
+      if (!data) return;
+      // ⬇️ 회전 지점 추출(비주차장도 동일 포맷)
+      setManeuvers(extractManeuvers(data));
 
-    const { pathPoints } = parseTmapGeojsonToPolyline(data);
+      const { pathPoints } = parseTmapGeojsonToPolyline(data);
 
-    clearRoutePath?.();
-    drawRoutePath(map, pathPoints, "#3897f0");
+      clearRoutePath?.();
+      drawRoutePath(map, pathPoints, "#3897f0");
 
-    window.__routeLocked = true; // 고정 유지
-  }
-};
+      window.__routeLocked = true; // 고정 유지
+    }
+  };
   // 선택된 권종 minutes와 startTime으로 종료시간 계산
   const endTime = React.useMemo(() => {
     if (!selectedTicket || !startTime) return "-";
@@ -477,7 +488,7 @@ export default function Main() {
 
     const { pathPoints, totalTime, totalDistance } =
         parseTmapGeojsonToPolyline(data);
-        setManeuvers(extractManeuvers(data));
+    setManeuvers(extractManeuvers(data));
 
     // 기존 경로 제거
     clearRoutePath();
@@ -537,7 +548,7 @@ export default function Main() {
   useEffect(() => {
     const fetchLastWeekData = async () => {
       try {
-        const res = await fetch("http://localhost:5000/ml/parking_data"); // 서버 주소 포함
+        const res = await fetch("/ml/parking_data"); // 서버 주소 포함
         if (!res.ok) throw new Error("데이터 요청 실패");
         const data = await res.json();
 
@@ -931,7 +942,7 @@ export default function Main() {
                     hideLegacyBottom
                 />
             )}
-            {mode === "favorites" && <FavoritesPanel map={map} coordinates={coordinates} ParkingList={parkingList} onRerouteClick={onRerouteClick} doRoute={doRoute} routeInfo={routeInfo} setRouteInfo={setRouteInfo}/>}
+            {mode === "favorites" && <FavoritesPanel map={map} coordinates={coordinates} ParkingList={parkingList} onRerouteClick={onRerouteClick} doRoute={doRoute} routeInfo={routeInfo} setRouteInfo={setRouteInfo} setMode={setMode} mode={mode}/>}
 
             {/* ✅ 경로가 생기면 카드만 노출 (중복 제거) */}
             {mode === "destination" && routeInfo?.destination && (
@@ -1005,11 +1016,11 @@ export default function Main() {
                         className="rt-ico rt-ico-close"
                         aria-label="닫기"
                         onClick={() => {
-                        setRouteInfo({});
-                        setGO(false);
-                        clearRoutePath?.();
-                        window.__routeLocked = false; // 잠금 해제
-                      }}
+                          setRouteInfo({});
+                          setGO(false);
+                          clearRoutePath?.();
+                          window.__routeLocked = false; // 잠금 해제
+                        }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M18 6L6 18M6 6l12 12"/>

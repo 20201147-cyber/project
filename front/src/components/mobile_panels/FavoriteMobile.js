@@ -11,7 +11,7 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
     const [loading, setLoading] = useState(true);
     const [me, setMe] = useState(null);
     const [list, setList] = useState([]);
-     // 주변 주차장 리스트
+    // 주변 주차장 리스트
     const [cancellingId, setCancellingId] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
     const { visibleOnly,nearbyList,setNearbyList,nearbyOverlays,setNearbyOverlays} = useContext(ParkingContext);
@@ -175,7 +175,7 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
         const myOverlay = new window.kakao.maps.CustomOverlay({
             position: myPos,
             content: myOverlayContent,
-            yAnchor: 3,
+            yAnchor: 4,
             zIndex: 1
         });
         myOverlay.setMap(map);
@@ -185,14 +185,14 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
         nearby.forEach((p, idx) => {
             const position = new window.kakao.maps.LatLng(parseFloat(p.LAT), parseFloat(p.LOT));
             const content = `
-            <div class="recommend-overlay">
+            <div class="recommend-overlay" >
                 추천 ${idx + 1}
             </div>
         `;
             const overlay = new window.kakao.maps.CustomOverlay({
                 position,
                 content,
-                yAnchor: 3,
+                yAnchor: 4,
                 zIndex: 1,
             });
             overlay.setMap(map);
@@ -225,13 +225,14 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
     if (!me?.username) {
         return (
             <div>
-                <div className="section-title">예약</div>
-                <div className="tip-box" style={{ textAlign: "center" }}>
+                <div className="section-title" style={{fontSize:30}}>예약</div>
+                <div className="tip-box" style={{ textAlign: "center",fontSize:30 }}>
                     예약 내역을 보려면 로그인이 필요합니다.
                     <div style={{ marginTop: 10 }}>
                         <button
                             className="primary-btn-center"
                             onClick={() => { window.location.href = "/login"; }}
+                            style={{fontSize:30}}
                         >
                             로그인 하러 가기
                         </button>
@@ -254,13 +255,13 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
 
     return (
         <div>
-            <p style={{ fontSize: "30px", color: "black", paddingLeft: "8px", textShadow: "1px 2px 5px rgba(0,0,0,0.5)" }}>
+            <p style={{ fontSize: "50px", color: "black", paddingLeft: "8px", textShadow: "1px 2px 5px rgba(0,0,0,0.5)" }}>
                 {formatTime(currentTime)}
             </p>
 
             {nearbyList ? (
                 <div className="nearby-list">
-                    <button className="ep-overlay__btn" onClick={handleCloseNearby}>추천 종료</button>
+                    <button className="ep-overlay__btn" onClick={handleCloseNearby} style={{fontSize:30}}>추천 종료</button>
                     {nearbyList.map((p,idx) => {
                         const total = p.TPKCT ?? 0;
                         const remain = p.remainCnt ?? 0;
@@ -271,17 +272,17 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
                                 key={p.PKLT_NM}
                                 className={`nearby-card ${p.isReserved ? "reserved-card" : ""}`}
                             >
-                                <div className="recommend-rank" style={{fontSize:20,color:"black",fontWeight:"bold"}}>추천 주차장{idx + 1}</div>
+                                <div className="recommend-rank" style={{fontSize:40,color:"black",fontWeight:"bold"}}>추천 주차장{idx + 1}</div>
                                 <hr style={{color:"black"}}></hr>
                                 <div className="nearby-head">
 
-                                    <div className="nearby-title">{p.PKLT_NM}</div>
-                                    {p.isReserved && <span className="reserved-badge">예약한 곳</span>}
+                                    <div className="nearby-title" style={{fontSize:30}}>{p.PKLT_NM}</div>
+                                    {p.isReserved && <span className="reserved-badge" style={{fontSize:30}}>예약한 곳</span>}
                                 </div>
 
                                 <div className="nearby-grid">
-                                    <div className="nearby-cell">총 좌석: {total}</div>
-                                    <div className="nearby-cell">남은 좌석: {remain}</div>
+                                    <div className="nearby-cell" style={{fontSize:30}}>총 좌석: {total}</div>
+                                    <div className="nearby-cell" style={{fontSize:30}}>남은 좌석: {remain}</div>
                                 </div>
 
                                 {/* ✅ 여석 비율 바 */}
@@ -310,6 +311,8 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
                                         const marker = new window.kakao.maps.Marker({ position: pos });
 
                                     }}
+                                    style={{fontSize:30}}
+
                                 >
                                     위치보기
                                 </button>
@@ -336,8 +339,8 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
                                 className="res-card"
                             >
                                 <div className="res-head">
-                                    <div className="res-title" title={r.parkName}>{r.parkName}</div>
-                                    <span className={`res-badge ${r.ticket === "DAY" ? "day" : "hour"}`} style={{textAlign:"center"}}>
+                                    <div className="res-title" style={{fontSize:30}} title={r.parkName}>{r.parkName}</div>
+                                    <span className={`res-badge ${r.ticket === "DAY" ? "day" : "hour"}`} style={{textAlign:"center",fontSize:15}}>
                                         {r.ticket === "DAY"
                                             ? "당일권"
                                             : `${Math.round((r.minutes || 0) / 60)}시간권`}
@@ -346,32 +349,33 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
 
                                 <div className="res-grid">
                                     <div className="res-cell full-width">
-                                        <div className="res-label" style={{ fontSize: "15px", color: "black" }}>예약까지</div>
-                                        <div className="res-value">
+                                        <div className="res-label" style={{ fontSize: "30px", color: "black" }}>예약까지</div>
+                                        <div className="res-value" style={{fontSize:30}}>
                                             {getRemainingTime(r.startTime ?? r.START_TIME ?? r.start_time)}
                                         </div>
                                     </div>
                                     <div className="res-cell">
-                                        <div className="res-label">시작시간</div>
-                                        <div className="res-value">{r.startTime ?? "-"}</div>
+                                        <div className="res-label" style={{fontSize:30}}>시작시간</div>
+                                        <div className="res-value" style={{fontSize:30}}>{r.startTime ?? "-"}</div>
                                     </div>
                                     <div className="res-cell">
-                                        <div className="res-label">시간</div>
-                                        <div className="res-value">{r.minutes ? `${Math.round(r.minutes / 60)}시간` : "-"}</div>
+                                        <div className="res-label" style={{fontSize:30}}>시간</div>
+                                        <div className="res-value" style={{fontSize:30}}>{r.minutes ? `${Math.round(r.minutes / 60)}시간` : "-"}</div>
                                     </div>
                                     <div className="res-cell">
-                                        <div className="res-label">결제금액</div>
-                                        <div className="res-value res-amount">{r.price != null ? `${Number(r.price).toLocaleString()}원` : "-"}</div>
+                                        <div className="res-label" style={{fontSize:30}}>결제금액</div>
+                                        <div className="res-value res-amount" style={{fontSize:30}}>{r.price != null ? `${Number(r.price).toLocaleString()}원` : "-"}</div>
                                     </div>
                                     <div className="res-cell">
-                                        <div className="res-label">여석</div>
-                                        <div className="res-value">{remainCnt}</div>
+                                        <div className="res-label" style={{fontSize:30}}>여석</div>
+                                        <div className="res-value" style={{fontSize:30}}>{remainCnt}</div>
                                     </div>
 
                                     {remainRatio < 0.2 && (
                                         <button
                                             className="ep-overlay__btn"
                                             onClick={() => handleRecommendNearby(r)}
+                                            style={{fontSize:30}}
                                         >
                                             주차장 추천
                                         </button>
@@ -382,7 +386,7 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
                                         onClick={() => handleCancel(r)}
                                         disabled={cancellingId === r.id}
                                         aria-busy={cancellingId === r.id}
-                                        style={{backgroundColor:"red",border:"none"}}
+                                        style={{backgroundColor:"red",border:"none",fontSize:30}}
                                     >
                                         {cancellingId === r.id
                                             ? "취소 중…"
@@ -395,7 +399,7 @@ export default function FavoritesPanel({ map, ParkingList, onRerouteClick, doRou
 
                                 <div className="res-meta-row">
                                     {r.createdAt ? (
-                                        <div className="res-meta">
+                                        <div className="res-meta" style={{fontSize:30}}>
                                             예약일시&nbsp;
                                             <time>{new Date(r.createdAt).toLocaleString()}</time>
                                         </div>

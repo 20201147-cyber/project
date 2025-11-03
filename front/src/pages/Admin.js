@@ -50,7 +50,6 @@ const Admin = () => {
                             <Nav.Link as={Link} to="/admin/dashboard">대시보드</Nav.Link>
                             <Nav.Link as={Link} to="/admin/parkingSearch">주차장 등록</Nav.Link>
                             <Nav.Link as={Link} to="/admin/parking">주차장 관리</Nav.Link>
-                            <Nav.Link as={Link} to="/admin/reservation">예약 관리</Nav.Link>
                         </Nav>
                     </Col>
 
