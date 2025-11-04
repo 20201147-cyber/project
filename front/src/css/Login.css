@@ -357,3 +357,51 @@
     font-size: 16px;
   }
 }
+
+/* ===== 모바일 최우선 오버라이드 (맨 마지막) ===== */
+@media screen and (max-width: 1024px) {
+  .login-2col {
+    flex-direction: column;
+    justify-content: center;     /* ⬅ 세로 가운데 정렬 */
+    align-items: center;
+    gap: 12px;                   /* 이미지–폼 사이 간격 */
+    padding: 16px 8px;           /* 아래 0이던 거를 전체 동일 패딩 */
+    background: #f6f6f6;
+    min-height: 100dvh;          /* ⬅ 다시 전체 화면 높이 채우기 */
+  }
+
+  /* 카드 + 폼 폭 통일 */
+  .login-left,
+  .login-right,
+  .photo-stack,
+  .login-page form {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .login-page h1 {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    font-size: 34px;
+    text-align: center;
+  }
+
+  .login-page form {
+    padding: 18px 14px 12px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    margin-bottom: 0;
+  }
+
+  .login-page input {
+    padding: 12px 10px;
+    font-size: 16px;
+  }
+
+  .login-page button[type="submit"],
+  .login-page button[type="button"] {
+    padding: 12px 10px;
+    font-size: 16px;
+  }
+}

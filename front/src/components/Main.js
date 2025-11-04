@@ -184,21 +184,54 @@ export default function Main() {
   }, [coordinates, go, routeInfo, parkingList, map]);
 
   useEffect(() => {
-    if (!go || !maneuvers?.length) { setNextTurn(null); return; }
+    if (!go || !maneuvers?.length) {
+      setNextTurn(null);
+      return;
+    }
+
+    const TURN_LOOKAHEAD_M = 400; // 몇 m 앞부터 안내할지 (원하면 300/500 등으로 조절)
+    const TURN_PASS_M      = 40;  // 턴 지점에서 이 거리 안으로 들어오면 "지나간 턴"으로 처리
 
     const { lat: curLat, lng: curLng } = coordinates;
-    let best = null;     // 30km 이내에서 가장 가까운 지점
-    let nearest = null;  // 범위 밖이면 전체 중 최단 지점 fallback
+
+    let best = null;    // 다음에 안내할 턴
+    const remain = [];  // 아직 지나지 않은 턴들만 남길 배열
 
     for (const m of maneuvers) {
+      const code = Number(m.turnType);
+
+      // 🔹 TURN_MAP에 등록되지 않은 턴(직진 등)은 안내 대상이 아님 → 완전 무시
+      if (!TURN_MAP[code]) {
+        // 그냥 continue 해도 되고, 남겨두고 싶으면 remain.push(m) 해도 됨
+        continue;
+      }
+
       const d = calcDistanceMeters(curLat, curLng, m.lat, m.lon);
-      if (!nearest || d < nearest.distM) nearest = { turnType: m.turnType, distM: d };
-      if (d <= 30000) { // 30km 허들
-        if (!best || d < best.distM) best = { turnType: m.turnType, distM: d };
+
+      // 🔹 턴 지점에서 충분히 가까워졌으면(예: 40m 이내) 이미 수행한 턴으로 보고 버림
+      if (d < TURN_PASS_M) {
+        // remain 에 안 넣고 스킵 → 다음 렌더부터는 이 턴은 목록에서 사라짐
+        continue;
+      }
+
+      // 아직 남아 있어야 하는 턴은 유지
+      remain.push(m);
+
+      // 🔹 TURN_LOOKAHEAD_M 이내의 턴 중에서 가장 가까운 턴 하나만 선택
+      if (d <= TURN_LOOKAHEAD_M) {
+        if (!best || d < best.distM) {
+          best = { turnType: code, distM: d };
+        }
       }
     }
-    setNextTurn(best || nearest);
-  }, [coordinates, go, maneuvers]);
+
+    // 지나간 턴이 있으면 maneuvers 상태 업데이트
+    if (remain.length !== maneuvers.length) {
+      setManeuvers(remain);
+    }
+
+    setNextTurn(best || null);
+  }, [coordinates, go, maneuvers, TURN_MAP, calcDistanceMeters]);
 
   // 지도 중심을 기준으로 재탐색
   const onRerouteClick = async () => {
@@ -975,7 +1008,6 @@ export default function Main() {
               className="map-canvas"
               style={{ width: "100%", height: "100%" }}
           />
-          {go && nextTurn && <TurnBanner turn={nextTurn.turnType} dist={nextTurn.distM} />}
           {routeInfo?.destination && routeInfo?.isParking && (
               <div className="route-toast-wrap">
                 <div className="route-toast route-toast--compact">

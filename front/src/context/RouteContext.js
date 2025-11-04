@@ -1,4 +1,4 @@
-// src/context/ParkingContext.js
+// src/context/RouteContext.js
 import React, { createContext, useState } from "react";
 
 export const RouteContext = createContext();
@@ -73,39 +73,80 @@ export const RouteProvider = ({ children }) => {
     }
     //좌회전 우회전 유턴 구현중
     // ===== Turn-by-turn utils =====
+    // ✅ "표시할 턴만" 넣기 (직진은 아예 제거)
     const TURN_MAP = {
-        11: { label: "좌회전", icon: "↰" },
-        12: { label: "우회전", icon: "↱" },
-        13: { label: "유턴",   icon: "⤴" },
-        14: { label: "직진",   icon: "↑"  },
-        // 필요하면 추가 (Tmap turnType 값 사용)
+    12: { label: "좌회전", icon: "↰" },
+    13: { label: "우회전", icon: "↱" },
+    14: { label: "유턴",   icon: "⤴" },
+
+    // 방향각 좌/우 회전도 필요하면 같은 아이콘으로 묶기
+    16: { label: "좌회전", icon: "↰" },
+    17: { label: "좌회전", icon: "↰" },
+    18: { label: "우회전", icon: "↱" },
+    19: { label: "우회전", icon: "↱" },
     };
 
     function formatMeters(m) {
-        if (m == null) return "-";
-        if (m < 1000) return `${Math.round(m)} m`;
-        return `${(m / 1000).toFixed(1)} km`;
+    if (m == null) return "-";
+    if (m < 1000) return `${Math.round(m)} m`;
+    return `${(m / 1000).toFixed(1)} km`;
     }
 
-    // 간단 배너 UI (map 우상단 고정)
     function TurnBanner({ turn, dist }) {
-        if (!turn) return null;
-        const t = TURN_MAP[turn] || { label: "안내", icon: "•" };
+        if (turn == null) return null;
+
+        const code = Number(turn);
+        const t = TURN_MAP[code];
+        // TURN_MAP 에 없는 코드(직진 등)는 표시하지 않음
+        if (!t) return null;
+
         return (
-            <div style={{
-                position: "fixed", top: 12, right: 12, zIndex: 1100,
-                background: "#111", color: "#fff", padding: "10px 12px",
-                borderRadius: 12, boxShadow: "0 6px 18px rgba(0,0,0,.25)",
-                display: "flex", alignItems: "center", gap: 8, fontWeight: 700
-            }}>
-                <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontSize: 13, opacity: .8 }}>앞으로</span>
-                    <span>{formatMeters(dist)} {t.label}</span>
-                </div>
+            <div
+            className="turn-banner"
+            style={{
+                position: "fixed",
+                top: 88,          // 🔸 헤더(안심 주행중) 바로 아래 정도
+                left: 12,
+                zIndex: 1200,
+                background: "rgba(17,24,39,0.96)",
+                color: "#fff",
+                padding: "12px 16px",
+                borderRadius: 16,
+                boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                fontWeight: 700,
+                maxWidth: "80vw",
+            }}
+            >
+            {/* 아이콘 박스 */}
+            <div
+                style={{
+                width: 180,
+                height: 80,
+                borderRadius: 14,
+                border: "1px solid rgba(255,255,255,0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 24,
+                }}
+            >
+                {t.icon}
+            </div>
+
+            {/* 텍스트 영역 */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span style={{ fontSize: 14, opacity: 0.9 }}>
+                앞으로 {formatMeters(dist)}
+                </span>
+                <span style={{ fontSize: 20 }}>{t.label}</span>
+            </div>
             </div>
         );
-    }
+        }
+
     // Tmap GeoJSON에서 회전 지점 추출 (turnType 있는 feature들을 Point로 간주)
     function extractManeuvers(data) {
         if (!data?.features?.length) return [];
@@ -113,19 +154,26 @@ export const RouteProvider = ({ children }) => {
         data.features.forEach((f) => {
             const p = f.properties || {};
             const g = f.geometry || {};
-            // 일부 응답은 LineString 세그먼트에도 turnType이 들어오기도 함 -> 좌표의 첫 점을 지점으로 취급
-            if (p.turnType != null) {
-                if (g.type === "Point" && Array.isArray(g.coordinates)) {
-                    const [lon, lat] = g.coordinates;
-                    list.push({ lat, lon, turnType: p.turnType });
-                } else if (g.type === "LineString" && Array.isArray(g.coordinates) && g.coordinates.length) {
-                    const [lon, lat] = g.coordinates[0];
-                    list.push({ lat, lon, turnType: p.turnType });
-                }
+            if (p.turnType == null) return;
+
+            const code = Number(p.turnType);
+            if (Number.isNaN(code)) return;
+
+            if (g.type === "Point" && Array.isArray(g.coordinates)) {
+                const [lon, lat] = g.coordinates;
+                list.push({ lat, lon, turnType: code });
+            } else if (
+                g.type === "LineString" &&
+                Array.isArray(g.coordinates) &&
+                g.coordinates.length
+            ) {
+                const [lon, lat] = g.coordinates[0];
+                list.push({ lat, lon, turnType: code });
             }
         });
         return list;
     }
+
     return (
         <RouteContext.Provider value={{calcDistanceMeters,clearRoutePath,drawRoutePath,clearRouteLine,TurnBanner,TURN_MAP,formatMeters,extractManeuvers}}>
             {children}

@@ -1058,7 +1058,7 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 }
 
 /* 주행 탭에서 기존 하단 고정 UI(구 바) 전부 숨김, 우리의 토스트만 허용 */
-.mode-drive .map-area > *:not(.map-canvas):not(.header-links):not(.route-toast-wrap):not(.filter-overlay){
+.mode-drive .map-area > *:not(.map-canvas):not(.header-links):not(.route-toast-wrap):not(.filter-overlay):not(.turn-banner){
     display: none !important;
 }
 

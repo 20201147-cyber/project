@@ -187,21 +187,46 @@ export default function Main() {
     }, [coordinates, go, routeInfo, parkingList, map]);
 
     useEffect(() => {
-        if (!go || !maneuvers?.length) { setNextTurn(null); return; }
+        if (!go || !maneuvers?.length) {
+            setNextTurn(null);
+            return;
+        }
+
+        const TURN_LOOKAHEAD_M = 400; // ✅ 이 거리 이내에 있는 턴부터 안내 (원하면 500, 800으로 조절)
+        const TURN_PASS_M      = 40;  // ✅ 이 거리 안으로 들어오면 "지나간 턴"으로 간주하고 삭제
 
         const { lat: curLat, lng: curLng } = coordinates;
-        let best = null;     // 30km 이내에서 가장 가까운 지점
-        let nearest = null;  // 범위 밖이면 전체 중 최단 지점 fallback
+
+        let best = null;    // 앞으로 안내할 다음 턴
+        const remain = [];  // 아직 지나지 않은 턴들
 
         for (const m of maneuvers) {
             const d = calcDistanceMeters(curLat, curLng, m.lat, m.lon);
-            if (!nearest || d < nearest.distM) nearest = { turnType: m.turnType, distM: d };
-            if (d <= 30000) { // 30km 허들
-                if (!best || d < best.distM) best = { turnType: m.turnType, distM: d };
+
+            // 🔹 턴 지점 40m 안으로 들어왔으면, 이 턴은 "이미 수행했다고" 보고 버림
+            if (d < TURN_PASS_M) {
+            continue; // remain 에 안 넣음
+            }
+
+            // 계속 남아 있어야 하는 턴은 remain 에 유지
+            remain.push(m);
+
+            // 🔹 TURN_LOOKAHEAD_M 이내에 있는 것 중에서 제일 가까운 턴 하나 선택
+            if (d <= TURN_LOOKAHEAD_M) {
+            if (!best || d < best.distM) {
+                best = { turnType: m.turnType, distM: d };
+            }
             }
         }
-        setNextTurn(best || nearest);
-    }, [coordinates, go, maneuvers]);
+
+        // 지나간 턴이 있으면 maneuvers 상태 업데이트 (다음 렌더부터는 목록에서 제거됨)
+        if (remain.length !== maneuvers.length) {
+            setManeuvers(remain);
+        }
+
+        // 안내할 턴이 없으면 배너 끔
+        setNextTurn(best || null);
+        }, [coordinates, go, maneuvers]);
 
     // 지도 중심을 기준으로 재탐색
     const onRerouteClick = async () => {
