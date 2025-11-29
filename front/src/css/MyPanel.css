@@ -1,0 +1,151 @@
+/* ===== My Panel (즐겨찾기) ===== */
+
+.my-panel {
+  padding-top: 4px;
+}
+
+/* 제목 / 설명 */
+.my-panel__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.my-panel__desc {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+/* 비어 있을 때 안내 박스 */
+.my-panel__empty {
+  padding: 14px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+  border: 1px dashed #e5e7eb;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* 즐겨찾기 리스트 컨테이너 */
+.my-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* 각 즐겨찾기 카드 */
+.my-panel__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid #eef0f4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.my-panel__main {
+  flex: 1 1 auto;
+  min-width: 0; /* ellipsis 동작용 */
+}
+
+/* 주차장 이름 */
+.my-panel__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+/* 잔여/전체 텍스트 */
+.my-panel__meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 유료/무료 + 시간 뱃지 */
+.my-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef6ff;
+  border: 1px solid #dbeafe;
+  font-size: 11px;
+  color: #2563eb;
+}
+
+/* 우측 버튼 스택 */
+.my-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 공통 버튼 베이스 */
+.my-panel__btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 길안내(프라이머리) */
+.my-panel__btn--primary {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.my-panel__btn--primary:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+.my-panel__btn--primary:active {
+  transform: translateY(0);
+}
+
+/* 삭제(고스트) */
+.my-panel__btn--ghost {
+  background: #fff;
+  color: #4b5563;
+  border-color: #e5e7eb;
+}
+.my-panel__btn--ghost:hover {
+  background: #f9fafb;
+  transform: translateY(-1px);
+}
+.my-panel__btn--ghost:active {
+  transform: translateY(0);
+}
+
+/* 스크롤바 정리 (크롬/엣지) */
+.my-panel__list::-webkit-scrollbar {
+  width: 6px;
+}
+.my-panel__list::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+.my-panel__list::-webkit-scrollbar-track {
+  background: transparent;
+}

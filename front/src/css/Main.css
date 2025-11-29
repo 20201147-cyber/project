@@ -1184,7 +1184,7 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 
 /* 시작 시간 셀렉트도 중앙 정렬 유지 */
 /* 기존 .time-select 규칙은 지우고, 아래로 통일 */
-.summary-item.start .time-select{
+.summary-item.start2 .time-select{
     width: auto;           /* 텍스트 너비만큼 */
     min-width: 88px;       /* 너무 좁아지지 않게 */
     margin: 0 auto;        /* 가로 가운데 정렬 */
@@ -1205,6 +1205,7 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
     line-height: 1.2;
     cursor: pointer;
 }
+
 /* 구형 Edge/IE 화살표 제거 */
 .summary-item.start .time-select::-ms-expand{ display:none; }
 
@@ -1312,3 +1313,28 @@ button:focus-visible, .link-btn:focus-visible, .tab:focus-visible,
 .loading-mini{ width:14px; height:14px; border:2px solid #ccc; border-top:2px solid var(--ink);
     border-radius:50%; animation:spin .9s linear infinite; }
 /* === [ADD] 도착시 UI 튜닝 끝 === */
+
+/* 탭 컨테이너 – 위 여백 줄이기 */
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+/* 각 탭 버튼 – 세로로 너무 납작해지지 않게 패딩/폰트 키우기 */
+.tab {
+  flex: 1 1 0;
+  padding: 9px 0;      /* ← 세로 높이 확보 (6px → 9~10px 정도) */
+  font-size: 15px;     /* ← 살짝 키워서 보기 좋게 */
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #f5f5f5;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* 활성 탭 */
+.tab.active {
+  background: #4d8dff;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}

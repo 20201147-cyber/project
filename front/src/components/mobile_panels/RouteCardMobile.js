@@ -238,7 +238,7 @@ export default function RouteCardMobile({
                     <div className="ep-drive-stats">
                         <div className="ep-stat"><span  style={{fontSize:30}}>거리</span><b style={{fontSize:30}}>{distanceStr} km</b></div>
                         <div className="ep-stat"><span  style={{fontSize:30}}>소요시간</span><b style={{fontSize:30}}>{timeMin} 분</b></div>
-                        <div className="ep-stat"><span  style={{fontSize:30}}>도착시간</span><b style={{fontSize:30}}>{eta}</b></div>
+                        <div className="ep-stat"><span  style={{fontSize:30}}>현재시간</span><b style={{fontSize:30}}>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</b></div>
                     </div>
                     <hr/>
 
@@ -246,16 +246,16 @@ export default function RouteCardMobile({
                     <div className="stat-stack">
                         {/* 헤더 */}
                         <div className="arrival-head" style={{fontSize:"20px"}}>
-                            <span className="loading-mini" aria-hidden="true"></span>
-                            <span  style={{fontSize:30}}>도착시</span>
+                            <span className="loading-mini" aria-hidden="true" style={{width:40,height:40}}></span>
+                            <span  style={{fontSize:30}}>도착시간</span>
                             <b style={{ marginLeft: 6,fontSize:30 }}>{eta}</b>
                         </div>
 
                         {/* 3개 카드: 정가운데 정렬 */}
-                        <div className="stats-row arrival-row">
-                            <div className="ep-stat2"><span  style={{fontSize:30}}>총자리</span><b  style={{fontSize:30}}>{park.TPKCT ?? "-"}</b></div>
-                            <div className="ep-stat2"><span  style={{fontSize:30}}>주차된 차량</span><b  style={{fontSize:30}}>{park.TPKCT - (predictedRemain != null ? Math.round(predictedRemain) : 0)}</b></div>
-                            <div className="ep-stat2"><span  style={{fontSize:30}}>도착시 여석</span><b  style={{fontSize:30}}>{predictedRemain != null ? Math.round(predictedRemain) : "-"}</b></div>
+                        <div className="stats-row arrival-row" >
+                            <div className="ep-stat2"><span  style={{fontSize:30,}}>총자리</span><b  style={{fontSize:30,color:"black"}}>{park.TPKCT ?? "-"}</b></div>
+                            <div className="ep-stat2"><span  style={{fontSize:30}}>주차된 차량</span><b  style={{fontSize:30,color:"black"}}>{park.TPKCT - (predictedRemain != null ? Math.round(predictedRemain) : 0)}</b></div>
+                            <div className="ep-stat2"><span  style={{fontSize:30}}>도착시 여석</span><b  style={{fontSize:30,color:"#3897f0"}}>{predictedRemain != null ? Math.round(predictedRemain) : "-"}</b></div>
                         </div>
 
                         {/* 도착시 혼잡도 게이지 (항상 노출) */}
@@ -264,17 +264,13 @@ export default function RouteCardMobile({
                             <div className="cap">{arrivalLabel}</div>
                         </div>
                     </div>
-
+                    <div className="arrival-head" style={{fontSize:"20px"}}>
+                        <span className="loading-mini" aria-hidden="true" style={{width:40,height:40}}></span>
+                        <span  style={{fontSize:30}}>현재시간</span>
+                        <b style={{ marginLeft: 6,fontSize:30 }}>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</b>
+                    </div>
                     {/* [2] 현재 블록 */}
-                    <div className="stats-row">
-                        <div className="ep-stat">
-                            <b>
-                          <span style={{ fontSize: "14px", color: "black" }}>
-                            <div  style={{fontSize:30}}>현재</div>
-                            <div  style={{fontSize:30}}>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })}</div>
-                          </span>
-                            </b>
-                        </div>
+                    <div className="stats-row  arrival-row">
                         <div className="ep-stat"><span  style={{fontSize:30}}>총자리</span><b style={{fontSize:30}}>{park.TPKCT ?? "-"}</b></div>
                         <div className="ep-stat"><span  style={{fontSize:30}}>주차된 차량</span><b style={{fontSize:30}}>{park.liveCnt ?? "-"}</b></div>
                         <div className="ep-stat"><span  style={{fontSize:30}}>현재 여석</span><b style={{fontSize:30}}>{expectedRemain}</b></div>

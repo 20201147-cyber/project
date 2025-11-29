@@ -58,7 +58,7 @@ const ReservationManage = () => {
     return (
         <div className="reservation-container">
             <h2 className="title">대시보드</h2>
-            <h2>{today}</h2>
+
             {myPark && (
                 <div className="park-info">
                     <div><strong>주차장 이름</strong> {myPark.PKLT_NM}</div>
@@ -71,11 +71,14 @@ const ReservationManage = () => {
             {filteredReservations.length === 0 ? (
                 <p className="no-reservation">예약 내역이 없습니다.</p>
             ) : (
+                <>
+                <h2>예약 현황</h2>
                 <div className="table-container" style={{ overflowX: "auto" }}>
+
                     <table className="reservation-table">
                         <thead>
-                        <tr>
-                            <th>사용자 ID</th>
+                        <tr style={{width:40}}>
+                            <th>예약자</th>
                             {hours.map(hour => (
                                 <th key={hour}>{hour}:00</th>
                             ))}
@@ -108,6 +111,7 @@ const ReservationManage = () => {
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
         </div>
     );

@@ -7,6 +7,7 @@ import axios from "axios";
 import DestinationPanel from "./panels/DestinationPanel";
 import DrivePanel from "./panels/DrivePanel";
 import FavoritesPanel from "./panels/FavoritesPanel";
+import MyPanel from "./panels/MyPanel";
 import ParkingChart from "./ParkingChart";
 import RouteCard from "./panels/RouteCard";
 import { ParkingContext } from "../context/ParkingContext";
@@ -23,6 +24,67 @@ export default function Main() {
     lat: 37.5662952,
     lng: 126.9779451,
   }); // 서울시청
+
+    // 즐겨찾기 주차장: [{ parkId, name }]
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const raw = localStorage.getItem("ep_favorites");
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("ep_favorites", JSON.stringify(favorites));
+    } catch (e) {
+      console.error("즐겨찾기 저장 실패:", e);
+    }
+  }, [favorites]);
+
+    // 특정 주차장을 즐겨찾기 토글
+  const toggleFavorite = (park) => {
+    if (!park?.PKLT_CD) return;
+    setFavorites((prev) => {
+      const exists = prev.some((f) => f.parkId === park.PKLT_CD);
+      if (exists) {
+        return prev.filter((f) => f.parkId !== park.PKLT_CD);
+      }
+      return [
+        ...prev,
+        { parkId: park.PKLT_CD, name: park.PKLT_NM ?? "이름 없는 주차장" },
+      ];
+    });
+  };
+
+  const removeFavorite = (parkId) => {
+    setFavorites((prev) => prev.filter((f) => f.parkId !== parkId));
+  };
+
+  // My 탭에서 즐겨찾기 선택 시: 지도 이동 + 경로 안내
+  const handleFavoriteSelect = async (fav) => {
+    if (!map || !parkingList?.length) return;
+    const park = parkingList.find((p) => p.PKLT_CD === fav.parkId);
+    if (!park) return;
+
+    const lat = parseFloat(park.LAT);
+    const lng = parseFloat(park.LOT);
+    if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+      const pos = new window.kakao.maps.LatLng(lat, lng);
+      map.setCenter(pos);
+    }
+
+    setMode("destination");
+    setRouteInfo((prev) => ({
+      ...prev,
+      destination: park.PKLT_NM,
+      isParking: true,
+    }));
+
+    const c = map.getCenter();
+    await doRoute(c.getLat(), c.getLng(), park.PKLT_NM);
+  };
 
   const [start, setStart] = useState({
     lat: 37.5662952,
@@ -249,7 +311,7 @@ export default function Main() {
         endY: routeInfo.destLat,
       });
       if (!data) return;
-      // ⬇️ 회전 지점 추출(비주차장도 동일 포맷)
+      //회전 지점 추출(비주차장도 동일 포맷)
       setManeuvers(extractManeuvers(data));
 
       const { pathPoints } = parseTmapGeojsonToPolyline(data);
@@ -293,7 +355,7 @@ export default function Main() {
       const startX = coordinates.lng;
       const startY = coordinates.lat;
 
-      // ⬇️ 주차장/비주차장 모두 처리
+      // 주차장/비주차장 모두 처리
       let endX, endY;
       if (routeInfo.isParking) {
         const endPark = parkingList.find(p => p.PKLT_NM === routeInfo.destination);
@@ -323,7 +385,7 @@ export default function Main() {
 
         const data = await res.json();
         if (!data.features || !data.features.length) return;
-        // ⬇️ 주차장/비주차장 공통: 회전 지점 반영
+        // 주차장/비주차장 공통: 회전 지점 반영
         setManeuvers(extractManeuvers(data));
 
         let pathPoints = [];
@@ -378,7 +440,7 @@ export default function Main() {
   useEffect(() => {
     window.onRerouteClick = onRerouteClick;
   }, [onRerouteClick]);
-  // ✅ 주행 탭으로 들어가면, #map 안의 예전 하단 바만 깔끔히 숨김
+  // 주행 탭으로 들어가면, #map 안의 예전 하단 바만 깔끔히 숨김
   useEffect(() => {
     if (mode !== "drive") return;
     const mapEl = document.getElementById("map");
@@ -541,43 +603,6 @@ export default function Main() {
       destination: destName,
     }));
   }
-  /*
-  // CSV 전체 파싱 (주차장별 데이터 구조화)
-  useEffect(() => {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 일=0, 월=1, ..., 수=3
-    const lastWeekDate = new Date(today);
-    lastWeekDate.setDate(today.getDate() - 7); // 7일 전
-    // 원하는 요일로 맞추기 (예: 오늘이 수요일이면 지난주 수요일)
-    const diff = dayOfWeek - lastWeekDate.getDay();
-    lastWeekDate.setDate(lastWeekDate.getDate() + diff);
-
-    // 파일명 생성: YYYYMMDD 형식
-    const yyyy = lastWeekDate.getFullYear();
-    const mm = String(lastWeekDate.getMonth() + 1).padStart(2, "0");
-    const dd = String(lastWeekDate.getDate()).padStart(2, "0");
-    const fileName = `/${yyyy}${mm}${dd}.csv`;
-    console.log(fileName)
-    Papa.parse("../../parking_data/20251004.csv", {
-      download: true,
-      header: true,
-      complete: (result) => {
-        const grouped = {};
-        result.data.forEach((row) => {
-          const name = row.PKLT_NM;
-          if (!name) return;
-          if (!grouped[name]) grouped[name] = [];
-          grouped[name].push({
-            time: row.timestamp ? row.timestamp.split(" ")[1].slice(0, 5) : "",
-            liveCnt: Number(row.liveCnt) || 0,
-            remainCnt: Number(row.remainCnt) || 0,
-          });
-        });
-        setCsvDataByName(grouped);
-      },
-      error: (err) => console.error("CSV 파싱 에러:", err),
-    });
-  }, []);*/
   useEffect(() => {
     const fetchLastWeekData = async () => {
       try {
@@ -662,9 +687,6 @@ export default function Main() {
       );
     });
   }, []);
-
-  // ⚠️ A안: 자동 라우팅 useEffect 제거됨
-  // (좌표/지도 변화에 따라 경로를 자동으로 다시 요청하지 않습니다)
 
   useEffect(() => {
     const suppress = go || mode === "drive";
@@ -941,7 +963,14 @@ export default function Main() {
                   className={`tab ${mode === "favorites" ? "active" : ""}`}
                   onClick={() => setMode("favorites")}
               >
-                예약 내역
+                예약
+              </button>
+              {/* ✅ 새로 추가되는 My 탭 */}
+              <button
+                className={`tab ${mode === "my" ? "active" : ""}`}
+                onClick={() => setMode("my")}
+              >
+                My
               </button>
             </div>
           </div>
@@ -974,6 +1003,15 @@ export default function Main() {
                     maneuvers={maneuvers}
                     hideLegacyBottom
                 />
+            )}
+            {/* ✅ My 탭: 즐겨찾기 목록 */}
+            {mode === "my" && (
+              <MyPanel
+                favorites={favorites}
+                parkingList={parkingList}
+                onSelectFavorite={handleFavoriteSelect}
+                onRemoveFavorite={removeFavorite}
+              />
             )}
             {mode === "favorites" && <FavoritesPanel map={map} coordinates={coordinates} ParkingList={parkingList} onRerouteClick={onRerouteClick} doRoute={doRoute} routeInfo={routeInfo} setRouteInfo={setRouteInfo} setMode={setMode} mode={mode}/>}
 
@@ -1122,8 +1160,45 @@ export default function Main() {
                         fontWeight: "600",
                         cursor: "pointer",
                       }}
-                  >
-                    안내 계속
+                      onClick={async () => {
+                        try {
+                          // 1️⃣ 주차장 ID 찾기
+                          const parkId = visibleOnly.find(p => p.PKLT_NM === routeInfo.destination)?.PKLT_CD;
+                          if (!parkId) {
+                            console.error("주차장 ID를 찾을 수 없습니다.");
+                            return;
+                          }
+
+                          // 2️⃣ 현재 사용자 예약 가져오기
+                          const response = await axios.get(`/api/reservations/park/${parkId}`);
+                          const reservations = response.data || [];
+                          const myReservations = reservations.filter(res => res.userId === user.id);
+
+                          if (myReservations.length === 0) {
+                            console.log("예약이 없습니다.");
+                            return;
+                          }
+
+                          const reservation = myReservations[0]; // 첫 번째 예약 선택
+                          const reservationId = reservation.id;
+
+                          // 3️⃣ ReservationDetailDTO 구성
+                          const detailDto = {
+                            reservationId: reservationId,
+                            userId: user.id,
+                            parkId: parkId,
+                            checkInTime: new Date() // 현재 시간
+                          };
+
+                          // 4️⃣ API 호출
+                          const result = await axios.post("/api/reservation-detail/create", detailDto);
+                          console.log("입차 완료:", result.data);
+
+                        } catch (error) {
+                          console.error("입차 처리 중 오류:", error);
+                        }
+                      }}>
+                    입차
                   </button>
                   <button
                       style={{

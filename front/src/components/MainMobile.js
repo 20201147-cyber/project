@@ -192,8 +192,8 @@ export default function Main() {
             return;
         }
 
-        const TURN_LOOKAHEAD_M = 400; // ✅ 이 거리 이내에 있는 턴부터 안내 (원하면 500, 800으로 조절)
-        const TURN_PASS_M      = 40;  // ✅ 이 거리 안으로 들어오면 "지나간 턴"으로 간주하고 삭제
+        const TURN_LOOKAHEAD_M = 400; //  이 거리 이내에 있는 턴부터 안내 (원하면 500, 800으로 조절)
+        const TURN_PASS_M      = 40;  // 이 거리 안으로 들어오면 "지나간 턴"으로 간주하고 삭제
 
         const { lat: curLat, lng: curLng } = coordinates;
 
@@ -244,7 +244,7 @@ export default function Main() {
                 endY: routeInfo.destLat,
             });
             if (!data) return;
-            // ⬇️ 회전 지점 추출(비주차장도 동일 포맷)
+            // 회전 지점 추출(비주차장도 동일 포맷)
             setManeuvers(extractManeuvers(data));
 
             const { pathPoints } = parseTmapGeojsonToPolyline(data);
@@ -288,7 +288,7 @@ export default function Main() {
             const startX = coordinates.lng;
             const startY = coordinates.lat;
 
-            // ⬇️ 주차장/비주차장 모두 처리
+            // 주차장/비주차장 모두 처리
             let endX, endY;
             if (routeInfo.isParking) {
                 const endPark = parkingList.find(p => p.PKLT_NM === routeInfo.destination);
@@ -318,7 +318,7 @@ export default function Main() {
 
                 const data = await res.json();
                 if (!data.features || !data.features.length) return;
-                // ⬇️ 주차장/비주차장 공통: 회전 지점 반영
+                // 주차장/비주차장 공통: 회전 지점 반영
                 setManeuvers(extractManeuvers(data));
 
                 let pathPoints = [];
@@ -373,7 +373,7 @@ export default function Main() {
     useEffect(() => {
         window.onRerouteClick = onRerouteClick;
     }, [onRerouteClick]);
-    // ✅ 주행 탭으로 들어가면, #map 안의 예전 하단 바만 깔끔히 숨김
+    // 주행 탭으로 들어가면, #map 안의 예전 하단 바만 깔끔히 숨김
     useEffect(() => {
         if (mode !== "drive") return;
         const mapEl = document.getElementById("map");
@@ -620,9 +620,6 @@ export default function Main() {
             );
         });
     }, []);
-
-    // ⚠️ A안: 자동 라우팅 useEffect 제거됨
-    // (좌표/지도 변화에 따라 경로를 자동으로 다시 요청하지 않습니다)
 
     useEffect(() => {
         const suppress = go || mode === "drive";
@@ -913,7 +910,7 @@ export default function Main() {
                     {user ? (
                         <Link className="link-btn" to="#" onClick={handleLogout} style={{fontSize:"30px"}}>로그아웃</Link>
                     ) : (
-                        <Link className="link-btn" to="/login" style={{fontSize:"30px"}}>로그인</Link>
+                        <Link className="link-btn" to="/loginMobile" style={{fontSize:"30px"}}>로그인</Link>
                     )}
                     <Link className="link-btn" to="/" style={{fontSize:"30px"}}>PC버전</Link>
                 </div>

@@ -16,6 +16,7 @@ import {MarkerProvider} from "./context/MarkerContext";
 import {RouteProvider} from "./context/RouteContext";
 import {CalculationProvider} from "./context/CalculationContext";
 import {MarkerProvider2} from "./context/MarkerContext2";
+import LoginMobile from "./pages/LoginMobile";
 
 
 // 라우팅 컴포넌트
@@ -32,9 +33,10 @@ const App = () => (
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="parkingSearch" element={<ParkingSearch />} />
-                <Route path="parking" element={<ParkingManage />} />
+                    <Route path="parking" element={<ParkingManage />} />
             </Route>
             <Route path="/login" element={<Login />} />
+            <Route path="/loginMobile" element={<LoginMobile/>}/>
             <Route path="/owner" element={<Owner />} />
             <Route path="/mobile" element={<MainMobile />} />
         </Routes>

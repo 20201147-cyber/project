@@ -349,3 +349,56 @@
     color: #000;
     font-weight: bold;
 }
+/* 라디오 버튼 숨기고 커스텀 버튼 스타일 적용 */
+
+.radio-label:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+
+/* 체크된 상태 강조 */
+.radio-btn:checked + .radio-label {
+    background-color: #1e90ff;
+    color: #fff;
+    border-color: #1e90ff;
+}
+/* 공통 라디오/버튼 스타일 */
+.radio-btn {
+    display: none; /* 실제 라디오 숨김 */
+}
+
+.radio-label,
+.btn-recommend-close {
+    font-size:15px;
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #111827;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    text-align: center;
+}
+.btn-recommend-close {
+    background-color:red;
+    color:white;
+    border:none;
+}
+.radio-label:hover,
+.btn-recommend-close:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+}
+.btn-recommend-close:hover {
+    background-color: red;
+}
+
+/* 체크된 라디오 강조 */
+.radio-btn:checked + .radio-label {
+    background-color: #1e90ff;
+    color: #fff;
+    border-color: #1e90ff;
+}
